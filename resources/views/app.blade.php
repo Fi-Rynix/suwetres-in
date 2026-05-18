@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suwetres.in - Deteksi Tingkat Stress & Fatigue Mahasiswa</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #F0FAF6;
+            --primary: #FF3366; /* Vibrant Neon Pink */
+            --secondary: #00F0FF; /* Neon Cyan */
+            --yellow: #FFE500; /* Neon Yellow */
+            --green: #00FF66; /* Neon Green */
+            --purple: #B233FF; /* Violet */
+            --dark: #000000;
+            --white: #FFFFFF;
+            --border-width: 4px;
+            --shadow-offset: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            background-image: 
+                radial-gradient(var(--dark) 1.5px, transparent 1.5px), 
+                radial-gradient(var(--dark) 1.5px, var(--bg) 1.5px);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+            color: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 3rem;
+        }
+
+        /* Navbar Style */
+        .navbar {
+            background-color: var(--yellow);
+            border-bottom: var(--border-width) solid var(--dark);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar-brand {
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            color: var(--dark);
+            text-decoration: none;
+            display: inline-block;
+            background-color: var(--white);
+            padding: 0.25rem 1rem;
+            border: var(--border-width) solid var(--dark);
+            box-shadow: 4px 4px 0 var(--dark);
+            transform: rotate(-1deg);
+        }
+
+        .navbar-info {
+            font-size: 1.1rem;
+            font-weight: 700;
+            background-color: var(--purple);
+            color: var(--white);
+            padding: 0.5rem 1.2rem;
+            border: var(--border-width) solid var(--dark);
+            box-shadow: 4px 4px 0 var(--dark);
+            text-transform: uppercase;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            margin: 3rem auto;
+            padding: 0 1.5rem;
+            flex: 1;
+        }
+
+        /* Neo Brutalism Box Component */
+        .neo-box {
+            background-color: var(--white);
+            border: var(--border-width) solid var(--dark);
+            box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--dark);
+            padding: 2.5rem;
+            border-radius: 0; /* Pure brutalism is flat and sharp */
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .neo-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            background-color: var(--primary);
+            border-bottom: var(--border-width) solid var(--dark);
+        }
+
+        /* Neo Button */
+        .neo-btn {
+            display: inline-block;
+            background-color: var(--green);
+            color: var(--dark);
+            font-size: 1.25rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            text-decoration: none;
+            padding: 1rem 2rem;
+            border: var(--border-width) solid var(--dark);
+            box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--dark);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-align: center;
+        }
+
+        .neo-btn:hover {
+            transform: translate(-3px, -3px);
+            box-shadow: 11px 11px 0 var(--dark);
+        }
+
+        .neo-btn:active {
+            transform: translate(3px, 3px);
+            box-shadow: 5px 5px 0 var(--dark);
+        }
+
+        .neo-btn-secondary {
+            background-color: var(--secondary);
+        }
+
+        .neo-btn-danger {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 1.8rem;
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 1.15rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 0.6rem;
+            color: var(--dark);
+        }
+
+        .neo-input {
+            width: 100%;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 0.9rem 1.2rem;
+            background-color: var(--white);
+            border: var(--border-width) solid var(--dark);
+            box-shadow: 5px 5px 0 var(--dark);
+            outline: none;
+            transition: all 0.15s ease;
+        }
+
+        .neo-input:focus {
+            background-color: #FFFDE5;
+            box-shadow: 7px 7px 0 var(--dark);
+            transform: translate(-2px, -2px);
+        }
+
+        /* Badges */
+        .neo-badge {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            border: 2px solid var(--dark);
+            box-shadow: 3px 3px 0 var(--dark);
+            margin-bottom: 1rem;
+            background-color: var(--yellow);
+        }
+
+        h1, h2, h3, h4 {
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 1rem;
+        }
+
+        p {
+            font-size: 1.1rem;
+            line-height: 1.5;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-top: 2rem;
+        }
+
+        /* Custom decorative elements */
+        .decor-star {
+            display: inline-block;
+            font-size: 1.5rem;
+            color: var(--primary);
+            animation: spin 6s linear infinite;
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+    @yield('styles')
+</head>
+<body>
+    <nav class="navbar">
+        <a href="{{ route('landing') }}" class="navbar-brand">SUWETRES.IN</a>
+        <div class="navbar-info">UAS / PRAKTIKUM AI</div>
+    </nav>
+
+    <div class="container">
+        @yield('content')
+    </div>
+
+    <footer class="footer">
+        <div class="neo-badge" style="background-color: var(--white); transform: rotate(1deg);">
+            © {{ date('Y') }} - SUWETRES.IN - GENERASI MAHASISWA ANTI-BURNOUT
+        </div>
+    </footer>
+    @yield('scripts')
+</body>
+</html>
