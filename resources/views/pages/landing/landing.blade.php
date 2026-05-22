@@ -1,4 +1,12 @@
-@extends('app')
+@extends('layouts.app')
+
+@section('styles')
+    <link rel="stylesheet" href="{{ asset('css/landing.css') }}">
+@endsection
+
+@section('scripts')
+    <script src="{{ asset('js/landing.js') }}"></script>
+@endsection
 
 @section('content')
 <div style="text-align: center; margin-top: 2rem; margin-bottom: 4rem;">

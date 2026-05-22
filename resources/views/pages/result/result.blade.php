@@ -1,4 +1,12 @@
-@extends('app')
+@extends('layouts.app')
+
+@section('styles')
+    <link rel="stylesheet" href="{{ asset('css/result.css') }}">
+@endsection
+
+@section('scripts')
+    <script src="{{ asset('js/result.js') }}"></script>
+@endsection
 
 @section('content')
 <div style="margin-top: 1rem;">

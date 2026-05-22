@@ -5,38 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\HasilAnalisis;
 
-class FatigueController extends Controller
+class FuzzyController extends Controller
 {
-    public function landing() {
-        return view('landing');
-    }
-
-    public function kuisioner() {
-        return view('kuisioner');
-    }
-
-    public function postKuisioner(Request $request) {
-        $validated = $request->validate([
-            'jam_tidur' => 'required|numeric|min:0|max:12',
-            'jumlah_tugas' => 'required|numeric|min:0|max:10',
-            'aktivitas_organisasi' => 'required|numeric|min:0|max:10',
-            'screen_time' => 'required|numeric|min:0|max:15',
-        ]);
-
-        // Simpan sementara di session
-        session(['data_kuisioner' => $validated]);
-        return redirect()->route('scan');
-    }
-
-    public function scan() {
-        if (!session('data_kuisioner')) return redirect()->route('kuisioner');
-        return view('scan');
-    }
-
-    public function loading() {
-        return view('loading');
-    }
-
     public function processFuzzy() {
         $data = session('data_kuisioner');
         if (!$data) return redirect()->route('kuisioner');
@@ -116,18 +86,6 @@ class FatigueController extends Controller
 
         session(['hasil_id' => $hasil->id]);
         return redirect()->route('result');
-    }
-
-    public function result() {
-        $hasil = HasilAnalisis::find(session('hasil_id'));
-        if (!$hasil) return redirect()->route('landing');
-        return view('result', compact('hasil'));
-    }
-
-    public function recommendation() {
-        $hasil = HasilAnalisis::find(session('hasil_id'));
-        if (!$hasil) return redirect()->route('landing');
-        return view('recommendation', compact('hasil'));
     }
 
     // --- Helper Functions Himpunan Fuzzy ---

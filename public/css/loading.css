@@ -1,0 +1,14 @@
+.loader-element {
+    width: 60px;
+    height: 60px;
+    border: var(--border-width) solid var(--dark);
+    background-color: var(--yellow);
+    box-shadow: 5px 5px 0 var(--dark);
+    margin: 0 auto 2rem auto;
+    animation: spin-brutal 1.2s infinite cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+
+@keyframes spin-brutal {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

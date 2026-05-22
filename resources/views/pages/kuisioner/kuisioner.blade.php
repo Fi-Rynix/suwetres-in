@@ -1,4 +1,12 @@
-@extends('app')
+@extends('layouts.app')
+
+@section('styles')
+    <link rel="stylesheet" href="{{ asset('css/kuisioner.css') }}">
+@endsection
+
+@section('scripts')
+    <script src="{{ asset('js/kuisioner.js') }}"></script>
+@endsection
 
 @section('content')
 <div style="max-width: 650px; margin: 1rem auto;">

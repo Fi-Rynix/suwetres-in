@@ -1,13 +1,19 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\FatigueController;
+use App\Http\Controllers\LandingController;
+use App\Http\Controllers\KuisionerController;
+use App\Http\Controllers\ScanController;
+use App\Http\Controllers\LoadingController;
+use App\Http\Controllers\ResultController;
+use App\Http\Controllers\RecommendationController;
+use App\Http\Controllers\FuzzyController;
 
-Route::get('/', [FatigueController::class, 'landing'])->name('landing');
-Route::get('/kuisioner', [FatigueController::class, 'kuisioner'])->name('kuisioner');
-Route::post('/kuisioner', [FatigueController::class, 'postKuisioner'])->name('post.kuisioner');
-Route::get('/scan', [FatigueController::class, 'scan'])->name('scan');
-Route::get('/loading', [FatigueController::class, 'loading'])->name('loading');
-Route::get('/process', [FatigueController::class, 'processFuzzy'])->name('process');
-Route::get('/result', [FatigueController::class, 'result'])->name('result');
-Route::get('/recommendation', [FatigueController::class, 'recommendation'])->name('recommendation');
+Route::get('/', [LandingController::class, 'landing'])->name('landing');
+Route::get('/kuisioner', [KuisionerController::class, 'kuisioner'])->name('kuisioner');
+Route::post('/kuisioner', [KuisionerController::class, 'postKuisioner'])->name('post.kuisioner');
+Route::get('/scan', [ScanController::class, 'scan'])->name('scan');
+Route::get('/loading', [LoadingController::class, 'loading'])->name('loading');
+Route::get('/process', [FuzzyController::class, 'processFuzzy'])->name('process');
+Route::get('/result', [ResultController::class, 'result'])->name('result');
+Route::get('/recommendation', [RecommendationController::class, 'recommendation'])->name('recommendation');
