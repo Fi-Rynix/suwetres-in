@@ -1,59 +1,140 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+<h1 align="center">🎭 Suwetres.in</h1>
 
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+<b>Sistem Deteksi Tingkat Stress & Fatigue Mahasiswa</b><br>
+<i>Fuzzy Sugeno + Facial Expression Recognition (FER)</i>
 </p>
 
-## About Laravel
+<p align="center">
+  <img alt="Laravel" src="https://img.shields.io/badge/Laravel-13-FF2D20?style=flat-square&logo=laravel">
+  <img alt="PHP" src="https://img.shields.io/badge/PHP-8.2+-777BB4?style=flat-square&logo=php">
+  <img alt="MySQL" src="https://img.shields.io/badge/MySQL-8-4479A1?style=flat-square&logo=mysql">
+  <img alt="Face-API.js" src="https://img.shields.io/badge/Face--API.js-1.7.13-00FF66?style=flat-square">
+  <img alt="UAS" src="https://img.shields.io/badge/Project-UAS%20Praktikum%20AI-FFE500?style=flat-square">
+</p>
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 📖 Tentang Project
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+**Suwetres.in** adalah sistem analisis tingkat stress & kelelahan mahasiswa yang menggabungkan dua metode:
 
-## Learning Laravel
+1. **🧠 Fuzzy Sugeno (Primary - 70%)** — Analisis aktivitas harian berbasis kuisioner (jam tidur, jumlah tugas, aktivitas organisasi, screen time)
+2. **🎭 Facial Expression Recognition (Supporting - 30%)** — Analisis ekspresi wajah real-time selama 5 detik menggunakan Face-API.js untuk deteksi 7 emosi
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+**Hasil akhir** adalah composite score 0-100 dengan klasifikasi 5-tier (Relaxed → Severe Stress) dan rekomendasi coping yang spesifik berdasarkan emosi dominan.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## 🚀 Quick Start
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Prerequisites
+- PHP ≥ 8.2
+- Composer
+- Node.js ≥ 18
+- MySQL (via Laragon/XAMPP)
 
-### Premium Partners
+### Installation
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+```bash
+# 1. Clone & install dependencies
+composer install
+npm install
 
-## Contributing
+# 2. Setup environment
+cp .env.example .env
+php artisan key:generate
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+# 3. Konfigurasi database di .env (DB_DATABASE, DB_USERNAME, DB_PASSWORD)
 
-## Code of Conduct
+# 4. Run migrations
+php artisan migrate
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# 5. Run dev server
+npm run dev          # Terminal 1: Vite
+php artisan serve    # Terminal 2: Laravel
+```
 
-## Security Vulnerabilities
+Buka `http://127.0.0.1:8000` di browser.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+> ⚠️ **Catatan:** Webcam butuh akses via `localhost` atau HTTPS. Browser akan blok kamera di HTTP non-localhost.
 
-## License
+---
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 🎯 Flow Aplikasi
+
+```
+Landing → Kuisioner → Scan (5s FER) → Loading → Process → Result → Recommendation
+```
+
+1. **Landing** — Halaman intro
+2. **Kuisioner** — Input 4 parameter aktivitas
+3. **Scan** — Webcam aktif, deteksi ekspresi wajah selama 5 detik
+4. **Loading** — Transisi visual
+5. **Process** — Hitung Fuzzy Sugeno + olah FER + composite scoring
+6. **Result** — Dashboard dual-analysis (Fatigue + FER terpisah)
+7. **Recommendation** — Saran coping berdasarkan kombinasi hasil
+
+---
+
+## 📚 Dokumentasi
+
+Dokumentasi lengkap ada di folder [`docs/`](./docs/):
+
+| Dokumen | Isi |
+|---------|-----|
+| [`docs/README.md`](./docs/README.md) | Index dokumentasi |
+| [`docs/Fatigue_System_Guide.md`](./docs/Fatigue_System_Guide.md) | Setup project dari nol |
+| [`docs/FER_Scanner_Flow.md`](./docs/FER_Scanner_Flow.md) ⭐ | **Cara kerja FER scanner (technical deep-dive)** |
+| [`docs/FER_Implementation_Guide.md`](./docs/FER_Implementation_Guide.md) | Quick-start testing fitur FER |
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Tech |
+|-------|------|
+| Backend | Laravel 13, PHP 8.2 |
+| Database | MySQL |
+| Frontend | Blade + vanilla JS + Tailwind 4 |
+| Build | Vite 7 |
+| FER | [Face-API.js](https://github.com/vladmandic/face-api) (TinyFaceDetector + FaceLandmark68 + FaceExpressionNet) |
+| Design | Neo Brutalism (CSS custom, Space Grotesk font) |
+
+---
+
+## 🧪 Testing Skenario
+
+### Skenario 1: Stress Tinggi
+```
+Jam tidur: 3, Tugas: 8, Organisasi: 6, Screen time: 12
+Saat scan: pasang muka serius/cemberut
+Expected: Final score > 70, "High Stress"
+```
+
+### Skenario 2: Relaxed
+```
+Jam tidur: 8, Tugas: 2, Organisasi: 1, Screen time: 4
+Saat scan: senyum
+Expected: Final score < 30, "Relaxed"
+```
+
+### Skenario 3: No FER (Fallback)
+```
+Tutup kamera atau tolak izin → klik "LANJUT TANPA FER"
+Expected: Final score = 100% Fuzzy
+```
+
+---
+
+## 🎓 Credit
+
+Project UAS Praktikum AI — implementasi Fuzzy Sugeno orde-0 dengan augmentasi Facial Expression Recognition untuk analisis stress mahasiswa yang lebih kontekstual.
+
+Dibangun dengan ❤️ menggunakan Laravel 13 dan Face-API.js.
+
+---
+
+## 📄 License
+
+MIT License — bebas digunakan untuk keperluan akademik dan non-komersial.
