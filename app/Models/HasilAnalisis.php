@@ -14,6 +14,18 @@ class HasilAnalisis extends Model
         'aktivitas_organisasi',
         'screen_time',
 
+        // === Psychological Fatigue Assessment ===
+        'fokus_belajar',
+        'kelelahan_setelah_istirahat',
+        'tekanan_tugas',
+        'keseimbangan_hidup',
+        'penurunan_produktivitas',
+        'kecemasan_deadline',
+        'dampak_screen_time',
+        'motivasi_kuliah',
+        'kelelahan_aktivitas',
+        'beban_mental',
+
         // === Hasil Fuzzy Sugeno (Primary - 70%) ===
         'nilai_fatigue',
         'status',
@@ -57,5 +69,17 @@ class HasilAnalisis extends Model
         'emotion_surprised' => 'float',
         'emotion_variance' => 'float',
         'negative_emotion_duration' => 'float',
+
+        // === Psychological inputs ===
+        'fokus_belajar' => 'integer',
+        'kelelahan_setelah_istirahat' => 'integer',
+        'tekanan_tugas' => 'integer',
+        'keseimbangan_hidup' => 'integer',
+        'penurunan_produktivitas' => 'integer',
+        'kecemasan_deadline' => 'integer',
+        'dampak_screen_time' => 'integer',
+        'motivasi_kuliah' => 'integer',
+        'kelelahan_aktivitas' => 'integer',
+        'beban_mental' => 'integer',
     ];
 }

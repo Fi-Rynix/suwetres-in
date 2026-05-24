@@ -1,0 +1,134 @@
+/* Landing Page Specific Styles */
+
+.landing-hero {
+    text-align: center;
+    margin-top: 2rem;
+    margin-bottom: 4rem;
+}
+
+.landing-badge {
+    background-color: var(--yellow);
+    transform: rotate(-1deg);
+    font-size: 1.1rem;
+    padding: 0.6rem 1.5rem;
+}
+
+.landing-title {
+    font-size: 4rem;
+    line-height: 1.1;
+    margin: 1.5rem 0 2rem 0;
+    text-transform: uppercase;
+}
+
+.landing-title-highlight {
+    background-color: var(--primary);
+    color: var(--white);
+    padding: 0 15px;
+    display: inline-block;
+    transform: rotate(1deg);
+    margin-top: 10px;
+    box-shadow: 4px 4px 0 var(--dark);
+}
+
+.landing-description {
+    font-size: 1.3rem;
+    max-width: 800px;
+    margin: 0 auto 3rem auto;
+    font-weight: 600;
+    line-height: 1.6;
+}
+
+.landing-description span.desc-span-1 {
+    background-color: var(--secondary);
+    padding: 0 5px;
+}
+
+.landing-description span.desc-span-2 {
+    background-color: var(--purple);
+    color: white;
+    padding: 0 5px;
+}
+
+.landing-action-container {
+    margin-bottom: 4rem;
+}
+
+.landing-btn {
+    padding: 1.3rem 3rem;
+    font-size: 1.5rem;
+    background-color: var(--green);
+    display: inline-block;
+}
+
+.landing-btn-inner {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.landing-btn-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+/* Grid Layout */
+.landing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.landing-box {
+    text-align: left;
+}
+
+.landing-box-yellow {
+    background-color: var(--yellow);
+}
+
+.landing-box-secondary {
+    background-color: var(--secondary);
+}
+
+.landing-box-purple {
+    background-color: var(--purple);
+    color: var(--white);
+}
+
+.landing-box-icon {
+    margin-bottom: 1rem;
+    color: var(--dark);
+}
+
+.landing-box-icon.text-white {
+    color: var(--white);
+}
+
+.landing-box-title {
+    font-size: 1.4rem;
+}
+
+.landing-box-title.text-white {
+    color: var(--white);
+}
+
+.landing-box-text {
+    font-size: 0.95rem;
+    margin: 0;
+    font-weight: 600;
+}
+
+.landing-box-text.text-white {
+    color: var(--white);
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .landing-title {
+        font-size: 2.5rem;
+    }
+    .landing-description {
+        font-size: 1.1rem;
+    }
+}

@@ -5,34 +5,47 @@
 @endsection
 
 @section('scripts')
-    <script src="{{ asset('js/result.js') }}"></script>
+    <script defer src="{{ asset('js/result.js') }}"></script>
 @endsection
 
 @section('content')
 @php
-    // === Helper: warna untuk fatigue (3-tier) ===
-    $fatigueBg = 'var(--green)';
-    $fatigueColor = 'var(--dark)';
-    if ($hasil->status == 'Kelelahan Sedang') {
-        $fatigueBg = 'var(--yellow)';
-    } elseif ($hasil->status == 'Kelelahan Tinggi') {
-        $fatigueBg = 'var(--primary)';
-        $fatigueColor = 'var(--white)';
-    }
+    // === 1. Calculate Psychological Fatigue Score ===
+    // inputs 1-10 scale. Average is scaled to percentage
+    // (Avg - 1) / 9 * 100
+    $avgPsychFatigue = ($hasil->kelelahan_setelah_istirahat + $hasil->kelelahan_aktivitas + $hasil->penurunan_produktivitas) / 3;
+    $psychFatiguePct = (($avgPsychFatigue - 1) / 9) * 100;
+    
+    // === 2. Calculate Academic Pressure Level ===
+    $avgAcademicPressure = ($hasil->tekanan_tugas + $hasil->kecemasan_deadline) / 2;
+    $academicPressurePct = (($avgAcademicPressure - 1) / 9) * 100;
 
-    // === Helper: warna untuk stress (5-tier) ===
+    // === 3. Calculate Emotional Exhaustion Level ===
+    $avgEmotionalExhaustion = ($hasil->beban_mental + $hasil->keseimbangan_hidup) / 2;
+    $emotionalExhaustionPct = (($avgEmotionalExhaustion - 1) / 9) * 100;
+
+    // Final score
+    $finalScore = $hasil->final_score ?? $hasil->nilai_fatigue;
+
+    // === Helpers for Colors and Statuses ===
     $stressMap = [
-        'Relaxed'          => ['bg' => 'var(--green)',     'color' => 'var(--dark)',  'emoji' => '😊'],
-        'Mild Pressure'    => ['bg' => 'var(--secondary)', 'color' => 'var(--dark)',  'emoji' => '😐'],
-        'Moderate Stress'  => ['bg' => 'var(--yellow)',    'color' => 'var(--dark)',  'emoji' => '😟'],
-        'High Stress'      => ['bg' => 'var(--primary)',   'color' => 'var(--white)', 'emoji' => '😰'],
-        'Severe Stress'    => ['bg' => 'var(--purple)',    'color' => 'var(--white)', 'emoji' => '😵'],
-        'Tidak Terdeteksi' => ['bg' => '#999999',          'color' => 'var(--white)', 'emoji' => '❓'],
+        'Relaxed'          => ['bg' => 'var(--green)',     'color' => 'var(--dark)',  'emoji' => '😊', 'gauge' => 'var(--green)',   'desc' => 'Kondisi mental tenang dan prima. Keep it up!'],
+        'Mild Pressure'    => ['bg' => 'var(--secondary)', 'color' => 'var(--dark)',  'emoji' => '😐', 'gauge' => 'var(--secondary)', 'desc' => 'Ada sedikit tekanan, tetapi masih dalam batas wajar.'],
+        'Moderate Stress'  => ['bg' => 'var(--yellow)',    'color' => 'var(--dark)',  'emoji' => '😟', 'gauge' => 'var(--yellow)',    'desc' => 'Tekanan sedang terdeteksi. Segera atur prioritas!'],
+        'High Stress'      => ['bg' => 'var(--primary)',   'color' => 'var(--white)', 'emoji' => '😰', 'gauge' => 'var(--primary)',   'desc' => 'Tingkat stres tinggi! Tubuh dan otak Anda menjerit minta istirahat.'],
+        'Severe Stress'    => ['bg' => 'var(--purple)',    'color' => 'var(--white)', 'emoji' => '😵', 'gauge' => 'var(--purple)',    'desc' => 'APOCALYPSE BURNOUT! Segera lepas layar dan ambil jeda darurat.'],
+        'Tidak Terdeteksi' => ['bg' => '#999999',          'color' => 'var(--white)', 'emoji' => '❓', 'gauge' => '#999999',         'desc' => 'Analisis gabungan diselesaikan menggunakan Fuzzy.'],
     ];
-    $ferStyle = $stressMap[$hasil->fer_status ?? 'Tidak Terdeteksi'] ?? $stressMap['Tidak Terdeteksi'];
-    $finalStyle = $stressMap[$hasil->final_status ?? 'Tidak Terdeteksi'] ?? $stressMap['Tidak Terdeteksi'];
 
-    // === Helper: emoji untuk emosi dominan ===
+    $finalStatus = $hasil->final_status ?? $hasil->status;
+    // Map status from fatigue tiers to stress tiers if necessary
+    if ($finalStatus == 'Kelelahan Ringan') $finalStatus = 'Relaxed';
+    if ($finalStatus == 'Kelelahan Sedang') $finalStatus = 'Moderate Stress';
+    if ($finalStatus == 'Kelelahan Tinggi') $finalStatus = 'High Stress';
+
+    $finalStyle = $stressMap[$finalStatus] ?? $stressMap['Moderate Stress'];
+
+    // === Emoji representation for dominant emotion ===
     $emotionEmoji = [
         'neutral'   => '😐',
         'happy'     => '😊',
@@ -43,7 +56,7 @@
         'surprised' => '😲',
     ];
 
-    // === List 7 emosi untuk loop ===
+    // === List 7 emotions for loop ===
     $emotionList = [
         ['key' => 'happy',     'label' => 'HAPPY',     'value' => $hasil->emotion_happy,     'color' => 'var(--green)'],
         ['key' => 'neutral',   'label' => 'NEUTRAL',   'value' => $hasil->emotion_neutral,   'color' => '#AAAAAA'],
@@ -55,241 +68,314 @@
     ];
 @endphp
 
-<div style="margin-top: 1rem;">
-    <div style="text-align: center; margin-bottom: 3rem;">
-        <div class="neo-badge" style="background-color: var(--green); font-size: 1.1rem; padding: 0.5rem 1.5rem;">
-            HASIL DIAGNOSIS STRESS DIHITUNG!
+<div class="result-container">
+    
+    <div class="result-header">
+        <div class="neo-badge result-subtitle-badge">
+            STUDENT BURNOUT & FATIGUE DIAGNOSIS
         </div>
-        <h1 style="font-size: 2.8rem; margin-top: 1rem;">DASHBOARD STRESS SUWETRES.IN</h1>
+        <h1 class="result-main-title">DASHBOARD ANALISIS STRES</h1>
     </div>
 
     <!-- ========================================================== -->
-    <!-- HERO: FINAL SCORE (Fuzzy 70% + FER 30%) -->
+    <!-- HERO BOX: NEW SVG STRESS GAUGE & MENTAL STATUS INDICATOR -->
     <!-- ========================================================== -->
-    <div class="neo-box" style="background-color: {{ $finalStyle['bg'] }}; color: {{ $finalStyle['color'] }}; text-align: center; margin-bottom: 3rem; padding: 2.5rem;">
-        <div style="font-size: 0.9rem; font-weight: 700; letter-spacing: 2px; opacity: 0.8;">
-            FINAL STRESS SCORE (FUZZY 70% + FER 30%)
+    <div class="result-hero-grid result-grid">
+        
+        <!-- Left: SVG Gauge -->
+        <div class="neo-box gauge-box">
+            <div class="gauge-container">
+                <svg class="gauge" viewBox="0 0 260 130">
+                    <!-- Semicircle arc background -->
+                    <path class="gauge-bg" d="M 20 120 A 110 110 0 0 1 240 120" />
+                    <!-- Animated indicator path -->
+                    <path class="gauge-fill" d="M 20 120 A 110 110 0 0 1 240 120" data-score="{{ $finalScore }}" style="stroke: {{ $finalStyle['gauge'] }};" />
+                </svg>
+                <div class="gauge-value-text">{{ number_format($finalScore, 0) }}%</div>
+            </div>
+            <div class="gauge-label">
+                Final Combined Stress Index
+            </div>
         </div>
-        <h1 style="font-size: 6rem; margin: 0.5rem 0; line-height: 1; text-shadow: 4px 4px 0px var(--dark);">
-            {{ number_format($hasil->final_score ?? $hasil->nilai_fatigue, 1) }}%
-        </h1>
-        <div style="background-color: var(--white); color: var(--dark); border: var(--border-width) solid var(--dark); box-shadow: 4px 4px 0 var(--dark); padding: 0.6rem 1.5rem; font-size: 1.3rem; font-weight: 700; text-transform: uppercase; transform: rotate(-1deg); display: inline-block; margin-top: 0.5rem;">
-            {{ $finalStyle['emoji'] }} {{ $hasil->final_status ?? $hasil->status }}
+
+        <!-- Right: Status Indicator & Interpretation -->
+        <div class="neo-box status-box" style="background-color: {{ $finalStyle['bg'] }}; color: {{ $finalStyle['color'] }};">
+            <div class="status-label">
+                Mental Headspace Status
+            </div>
+            <h1 class="status-title">
+                {{ $finalStyle['emoji'] }} {{ $finalStatus }}
+            </h1>
+            <p class="status-desc">
+                {{ $finalStyle['desc'] }}
+            </p>
         </div>
     </div>
 
     <!-- ========================================================== -->
-    <!-- DUA KOLOM: FATIGUE (Primary) vs FER (Supporting) -->
+    <!-- ANALYTICS CARDS (DAILY ACTIVITIES & FUZZY VARIABLES) -->
     <!-- ========================================================== -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: stretch; margin-bottom: 3rem;" class="result-grid">
+    <div class="analytics-grid">
+        <div class="analytics-card border-purple">
+            <div class="analytics-card-label">Tidur Semalam</div>
+            <div class="analytics-card-value">{{ $hasil->jam_tidur }} Jam</div>
+            <div class="analytics-card-desc" style="color: {{ $hasil->jam_tidur < 5 ? 'var(--primary)' : 'var(--green)' }}; font-weight: 700;">
+                {{ $hasil->jam_tidur < 5 ? '🔴 Kurang Tidur' : '🟢 Cukup Tidur' }}
+            </div>
+        </div>
+        <div class="analytics-card border-secondary">
+            <div class="analytics-card-label">Screen Time</div>
+            <div class="analytics-card-value">{{ $hasil->screen_time }} Jam</div>
+            <div class="analytics-card-desc" style="color: {{ $hasil->screen_time > 8 ? 'var(--primary)' : 'var(--green)' }}; font-weight: 700;">
+                {{ $hasil->screen_time > 8 ? '🔴 Berlebih (Detox)' : '🟢 Normal' }}
+            </div>
+        </div>
+        <div class="analytics-card border-yellow">
+            <div class="analytics-card-label">Fokus Belajar</div>
+            <div class="analytics-card-value">{{ 11 - $hasil->fokus_belajar }} / 10</div>
+            @php
+                $fokusScore = 11 - $hasil->fokus_belajar;
+                if ($fokusScore <= 3) {
+                    $fokusLabel = 'Sangat Rendah';
+                    $fokusColor = 'var(--primary)';
+                    $fokusEmoji = '🔴';
+                } elseif ($fokusScore <= 6) {
+                    $fokusLabel = 'Sedang';
+                    $fokusColor = '#AA8800';
+                    $fokusEmoji = '🟡';
+                } elseif ($fokusScore <= 8) {
+                    $fokusLabel = 'Tinggi';
+                    $fokusColor = 'var(--green)';
+                    $fokusEmoji = '🟢';
+                } else {
+                    $fokusLabel = 'Sangat Tinggi';
+                    $fokusColor = 'var(--purple)';
+                    $fokusEmoji = '✨';
+                }
+            @endphp
+            <div class="analytics-card-desc" style="color: {{ $fokusColor }}; font-weight: 700;">
+                {{ $fokusEmoji }} {{ $fokusLabel }}
+            </div>
+        </div>
+        <div class="analytics-card border-green">
+            <div class="analytics-card-label">Motivasi Kuliah</div>
+            <div class="analytics-card-value">{{ 11 - $hasil->motivasi_kuliah }} / 10</div>
+            @php
+                $motivasiScore = 11 - $hasil->motivasi_kuliah;
+                if ($motivasiScore <= 3) {
+                    $motivasiLabel = 'Sangat Rendah';
+                    $motivasiColor = 'var(--primary)';
+                    $motivasiEmoji = '🔴';
+                } elseif ($motivasiScore <= 6) {
+                    $motivasiLabel = 'Sedang';
+                    $motivasiColor = '#AA8800';
+                    $motivasiEmoji = '🟡';
+                } elseif ($motivasiScore <= 8) {
+                    $motivasiLabel = 'Tinggi';
+                    $motivasiColor = 'var(--green)';
+                    $motivasiEmoji = '🟢';
+                } else {
+                    $motivasiLabel = 'Sangat Tinggi';
+                    $motivasiColor = 'var(--purple)';
+                    $motivasiEmoji = '✨';
+                }
+            @endphp
+            <div class="analytics-card-desc" style="color: {{ $motivasiColor }}; font-weight: 700;">
+                {{ $motivasiEmoji }} {{ $motivasiLabel }}
+            </div>
+        </div>
+    </div>
 
-        <!-- ============= BOX FATIGUE (Primary 70%) ============= -->
-        <div class="neo-box" style="background-color: var(--white); padding: 2rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid var(--dark); padding-bottom: 0.8rem; margin-bottom: 1.5rem;">
-                <h3 style="font-size: 1.4rem; margin: 0;">📊 FATIGUE ANALYSIS</h3>
-                <span style="background: var(--yellow); border: 2px solid var(--dark); padding: 0.2rem 0.6rem; font-size: 0.75rem; font-weight: 700;">
-                    PRIMARY 70%
-                </span>
+    <!-- ========================================================== -->
+    <!-- TWO COLUMNS: PSYCHOLOGICAL FATIGUE CHART VS AI FACE EMOTION -->
+    <!-- ========================================================== -->
+    <div class="two-col-grid result-grid">
+
+        <!-- Left Column: Psychological Fatigue Sub-Scores -->
+        <div class="neo-box result-panel">
+            <h3 class="panel-title">
+                🧠 PSYCHOLOGICAL FATIGUE BREAKDOWN
+            </h3>
+            
+            <p class="panel-desc">
+                Sub-skor kelelahan psikologis dihitung secara ilmiah dari 10 parameter kondisi mental di kuisioner Anda:
+            </p>
+
+            <div class="flex-col">
+                <!-- Row 1: Psychological Fatigue -->
+                <div class="breakdown-row">
+                    <span style="font-weight: 700; font-size: 0.95rem;">Psych Fatigue Score</span>
+                    <div class="breakdown-bar-outer">
+                        <div class="breakdown-bar-inner" data-width="{{ $psychFatiguePct }}" style="background-color: var(--primary);"></div>
+                    </div>
+                    <span style="font-weight: 700; text-align: right; font-size: 0.95rem;">{{ number_format($psychFatiguePct, 0) }}%</span>
+                </div>
+
+                <!-- Row 2: Academic Pressure -->
+                <div class="breakdown-row">
+                    <span style="font-weight: 700; font-size: 0.95rem;">Academic Pressure</span>
+                    <div class="breakdown-bar-outer">
+                        <div class="breakdown-bar-inner" data-width="{{ $academicPressurePct }}" style="background-color: var(--yellow);"></div>
+                    </div>
+                    <span style="font-weight: 700; text-align: right; font-size: 0.95rem;">{{ number_format($academicPressurePct, 0) }}%</span>
+                </div>
+
+                <!-- Row 3: Emotional Exhaustion -->
+                <div class="breakdown-row">
+                    <span style="font-weight: 700; font-size: 0.95rem;">Emotional Exhaustion</span>
+                    <div class="breakdown-bar-outer">
+                        <div class="breakdown-bar-inner" data-width="{{ $emotionalExhaustionPct }}" style="background-color: var(--purple);"></div>
+                    </div>
+                    <span style="font-weight: 700; text-align: right; font-size: 0.95rem;">{{ number_format($emotionalExhaustionPct, 0) }}%</span>
+                </div>
             </div>
 
-            <!-- Score & Status -->
-            <div style="background-color: {{ $fatigueBg }}; color: {{ $fatigueColor }}; border: 3px solid var(--dark); box-shadow: 4px 4px 0 var(--dark); padding: 1.5rem; text-align: center; margin-bottom: 1.5rem;">
-                <div style="font-size: 0.85rem; font-weight: 700; letter-spacing: 1px;">FUZZY SUGENO SCORE</div>
-                <div style="font-size: 3.5rem; font-weight: 700; line-height: 1; margin: 0.3rem 0;">
-                    {{ number_format($hasil->nilai_fatigue, 1) }}%
+            <!-- Recommendation Summary Alert Box -->
+            <div class="action-tip-box">
+                <div class="action-tip-title">
+                    💡 AI RANGKUMAN TINDAKAN:
                 </div>
-                <div style="background: var(--white); color: var(--dark); border: 2px solid var(--dark); padding: 0.3rem 0.8rem; display: inline-block; font-weight: 700; font-size: 0.95rem; text-transform: uppercase;">
-                    {{ $hasil->status }}
-                </div>
-            </div>
-
-            <!-- Detail Parameter -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
-                <div style="background: #FFFDE5; border: 2px solid var(--dark); padding: 0.7rem; box-shadow: 3px 3px 0 var(--dark);">
-                    <div style="font-size: 0.75rem; font-weight: 700; color: #555;">JAM TIDUR</div>
-                    <div style="font-size: 1.3rem; font-weight: 700;">{{ $hasil->jam_tidur }} Jam</div>
-                </div>
-                <div style="background: #F0F8FF; border: 2px solid var(--dark); padding: 0.7rem; box-shadow: 3px 3px 0 var(--dark);">
-                    <div style="font-size: 0.75rem; font-weight: 700; color: #555;">JUMLAH TUGAS</div>
-                    <div style="font-size: 1.3rem; font-weight: 700;">{{ $hasil->jumlah_tugas }} Buah</div>
-                </div>
-                <div style="background: #FFF0F5; border: 2px solid var(--dark); padding: 0.7rem; box-shadow: 3px 3px 0 var(--dark);">
-                    <div style="font-size: 0.75rem; font-weight: 700; color: #555;">ORGANISASI</div>
-                    <div style="font-size: 1.3rem; font-weight: 700;">{{ $hasil->aktivitas_organisasi }} Jam</div>
-                </div>
-                <div style="background: #F5FFFA; border: 2px solid var(--dark); padding: 0.7rem; box-shadow: 3px 3px 0 var(--dark);">
-                    <div style="font-size: 0.75rem; font-weight: 700; color: #555;">SCREEN TIME</div>
-                    <div style="font-size: 1.3rem; font-weight: 700;">{{ $hasil->screen_time }} Jam</div>
+                <div class="action-tip-desc">
+                    @if ($finalScore >= 75)
+                        Prioritaskan digital detox, tolak rapat organisasi tambahan, dan matikan HP jam 10 malam untuk tidur darurat 8-9 jam penuh.
+                    @elseif ($finalScore >= 45)
+                        Gunakan Pomodoro (25m belajar, 5m rileks), stretching bahu/leher, lakukan journaling perasaan di sela deadline.
+                    @else
+                        Kondisi mental prima. Pertahankan konsistensi tidur dan gaskeun tugas tersulit hari ini mumpung energi melimpah!
+                    @endif
                 </div>
             </div>
         </div>
 
-        <!-- ============= BOX FER (Supporting 30%) ============= -->
-        <div class="neo-box" style="background-color: var(--white); padding: 2rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid var(--dark); padding-bottom: 0.8rem; margin-bottom: 1.5rem;">
-                <h3 style="font-size: 1.4rem; margin: 0;">😟 FER STRESS ANALYSIS</h3>
-                <span style="background: var(--secondary); border: 2px solid var(--dark); padding: 0.2rem 0.6rem; font-size: 0.75rem; font-weight: 700;">
+        <!-- Right Column: AI Facial Emotion Recognition (Supporting 30%) -->
+        <div class="neo-box result-panel">
+            <div class="panel-title-spaced">
+                <h3 class="panel-title-inline">📷 AI FACIAL EXPRESSION SCAN</h3>
+                <span class="supporting-badge">
                     SUPPORTING 30%
                 </span>
             </div>
 
             @if ($hasil->fer_detected)
                 <!-- Score & Status -->
-                <div style="background-color: {{ $ferStyle['bg'] }}; color: {{ $ferStyle['color'] }}; border: 3px solid var(--dark); box-shadow: 4px 4px 0 var(--dark); padding: 1.5rem; text-align: center; margin-bottom: 1.5rem;">
-                    <div style="font-size: 0.85rem; font-weight: 700; letter-spacing: 1px;">FACE-API STRESS SCORE</div>
-                    <div style="font-size: 3.5rem; font-weight: 700; line-height: 1; margin: 0.3rem 0;">
-                        {{ number_format($hasil->fer_stress_score, 1) }}%
+                <div class="fer-summary-box">
+                    <div>
+                        <div class="fer-summary-label">Face-API.js Stress Index</div>
+                        <div class="fer-summary-value">
+                            {{ number_format($hasil->fer_stress_score, 1) }}%
+                        </div>
                     </div>
-                    <div style="background: var(--white); color: var(--dark); border: 2px solid var(--dark); padding: 0.3rem 0.8rem; display: inline-block; font-weight: 700; font-size: 0.95rem; text-transform: uppercase;">
-                        {{ $ferStyle['emoji'] }} {{ $hasil->fer_status }}
+                    <div class="fer-summary-status">
+                        {{ $hasil->fer_status }}
                     </div>
                 </div>
 
                 <!-- Dominant Emotion -->
-                <div style="background: #FFFDE5; border: 2px solid var(--dark); padding: 0.8rem; box-shadow: 3px 3px 0 var(--dark); margin-bottom: 1rem; text-align: center;">
-                    <div style="font-size: 0.75rem; font-weight: 700; color: #555;">EMOSI DOMINAN</div>
-                    <div style="font-size: 1.3rem; font-weight: 700;">
-                        {{ $emotionEmoji[$hasil->dominant_emotion] ?? '❓' }}
-                        {{ strtoupper($hasil->dominant_emotion ?? '-') }}
+                <div class="fer-dominant-box">
+                    <div class="fer-dominant-label">EMOSI WAJAH DOMINAN</div>
+                    <div class="fer-dominant-value">
+                        {{ $emotionEmoji[$hasil->dominant_emotion] ?? '😐' }}
+                        {{ $hasil->dominant_emotion ?? 'neutral' }}
                         ({{ number_format(($hasil->dominant_emotion_score ?? 0) * 100, 1) }}%)
                     </div>
                 </div>
 
-                <!-- Indicator Cards -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
-                    <div style="background: #F0F8FF; border: 2px solid var(--dark); padding: 0.7rem; box-shadow: 3px 3px 0 var(--dark);">
-                        <div style="font-size: 0.75rem; font-weight: 700; color: #555;">STABILITAS</div>
-                        <div style="font-size: 1.1rem; font-weight: 700;">
-                            {{ ($hasil->emotion_variance ?? 0) > 0.3 ? '⚠️ Unstable' : '✅ Stable' }}
+                <!-- Breakdown of all 7 emotions -->
+                <div class="fer-breakdown-list">
+                    @foreach ($emotionList as $emo)
+                        @php $pct = ($emo['value'] ?? 0) * 100; @endphp
+                        <div class="fer-breakdown-row">
+                            <span class="fer-breakdown-name">
+                                {{ $emotionEmoji[$emo['key']] }} {{ $emo['label'] }}
+                            </span>
+                            <div class="fer-breakdown-bar-outer">
+                                <div style="width: {{ $pct }}%; height: 100%; background: {{ $emo['color'] }};"></div>
+                            </div>
+                            <span class="fer-breakdown-pct">{{ number_format($pct, 0) }}%</span>
                         </div>
-                    </div>
-                    <div style="background: #FFF0F5; border: 2px solid var(--dark); padding: 0.7rem; box-shadow: 3px 3px 0 var(--dark);">
-                        <div style="font-size: 0.75rem; font-weight: 700; color: #555;">DURASI NEGATIF</div>
-                        <div style="font-size: 1.1rem; font-weight: 700;">
-                            {{ number_format($hasil->negative_emotion_duration ?? 0, 1) }}s / 5s
-                        </div>
-                    </div>
-                    <div style="background: #F5FFFA; border: 2px solid var(--dark); padding: 0.7rem; box-shadow: 3px 3px 0 var(--dark);">
-                        <div style="font-size: 0.75rem; font-weight: 700; color: #555;">FRAMES</div>
-                        <div style="font-size: 1.1rem; font-weight: 700;">{{ $hasil->total_frames_analyzed ?? 0 }}</div>
-                    </div>
-                    <div style="background: #FFFDE5; border: 2px solid var(--dark); padding: 0.7rem; box-shadow: 3px 3px 0 var(--dark);">
-                        <div style="font-size: 0.75rem; font-weight: 700; color: #555;">MODEL</div>
-                        <div style="font-size: 1.1rem; font-weight: 700;">Face-API.js</div>
-                    </div>
+                    @endforeach
                 </div>
             @else
                 <!-- FER Tidak Terdeteksi -->
-                <div style="background-color: #999999; color: var(--white); border: 3px solid var(--dark); box-shadow: 4px 4px 0 var(--dark); padding: 2rem; text-align: center; margin-bottom: 1rem;">
-                    <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">❓</div>
-                    <div style="font-size: 1.1rem; font-weight: 700;">WAJAH TIDAK TERDETEKSI</div>
-                    <div style="font-size: 0.85rem; margin-top: 0.5rem; opacity: 0.9;">
-                        Skor akhir 100% dari Fuzzy Sugeno
+                <div class="fer-undetected-box">
+                    <div class="fer-undetected-icon">❓</div>
+                    <div class="fer-undetected-title">Face Scan Tidak Terdeteksi</div>
+                    <div class="fer-undetected-subtitle">
+                        Diagnosis diselesaikan 100% menggunakan Fuzzy Sugeno.
                     </div>
                 </div>
-                <p style="font-size: 0.9rem; color: #555; font-weight: 600;">
-                    Kamera tidak aktif atau wajah tidak ter-scan. Coba lagi dengan pencahayaan yang lebih baik untuk mendapatkan analisis FER yang akurat.
+                <p class="fer-undetected-desc">
+                    Anda melewatkan scan kamera atau wajah terhalang. Coba ulangi dengan mengaktifkan kamera agar Face-API.js AI dapat mendukung akurasi stress score Anda!
                 </p>
             @endif
         </div>
     </div>
 
     <!-- ========================================================== -->
-    <!-- DETAIL EMOSI BREAKDOWN -->
+    <!-- TECHNICAL DIAGNOSTICS & SYSTEM INFO -->
     <!-- ========================================================== -->
-    @if ($hasil->fer_detected)
-        <div class="neo-box" style="background-color: var(--white); padding: 2rem; margin-bottom: 3rem;">
-            <h3 style="font-size: 1.4rem; border-bottom: 4px solid var(--dark); padding-bottom: 0.8rem; margin-bottom: 1.5rem;">
-                🎭 BREAKDOWN 7 EMOSI (RATA-RATA SELAMA SCAN)
-            </h3>
-            <div style="display: flex; flex-direction: column; gap: 0.6rem;">
-                @foreach ($emotionList as $emo)
-                    @php $pct = ($emo['value'] ?? 0) * 100; @endphp
-                    <div style="display: grid; grid-template-columns: 140px 1fr 70px; gap: 1rem; align-items: center;">
-                        <span style="font-weight: 700; font-size: 0.9rem;">
-                            {{ $emotionEmoji[$emo['key']] }} {{ $emo['label'] }}
-                        </span>
-                        <div style="height: 22px; background: #EEE; border: 2px solid var(--dark); box-shadow: 2px 2px 0 var(--dark);">
-                            <div style="width: {{ $pct }}%; height: 100%; background: {{ $emo['color'] }}; transition: width 0.5s;"></div>
-                        </div>
-                        <span style="font-weight: 700; text-align: right; font-size: 0.9rem;">{{ number_format($pct, 1) }}%</span>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    @endif
+    <h3 class="system-info-title">
+        ⚙️ Informasi Sistem & Parameter Fuzzy Sugeno
+    </h3>
+    <div class="system-info-grid">
 
-    <!-- ========================================================== -->
-    <!-- DUMMY ANALYTICS / RULES INFO -->
-    <!-- ========================================================== -->
-    <h3 style="font-size: 1.6rem; margin-bottom: 1.5rem; text-align: left;">DETAIL PERHITUNGAN & DB TRACKING</h3>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; margin-bottom: 4rem;">
-
-        <div class="neo-box" style="background-color: var(--white); margin: 0; padding: 1.5rem;">
-            <h4 style="font-size: 1.1rem; border-bottom: 2px solid var(--dark); padding-bottom: 0.5rem; margin-bottom: 1rem;">
-                FORMULA FINAL SCORE
+        <div class="neo-box system-info-box">
+            <h4 class="system-info-header">
+                MATRIKS FUZZY SUGENO
             </h4>
-            <p style="font-size: 0.9rem; margin-bottom: 0.5rem; font-weight: 600;">
-                • Fuzzy Score: <b>{{ number_format($hasil->nilai_fatigue, 1) }}% × 0.7</b>
+            <p class="system-info-text">
+                • Fuzzy Score: <b>{{ number_format($hasil->nilai_fatigue, 1) }}% × 70%</b>
             </p>
-            <p style="font-size: 0.9rem; margin-bottom: 0.5rem; font-weight: 600;">
-                • FER Score: <b>{{ number_format($hasil->fer_stress_score ?? 0, 1) }}% × 0.3</b>
+            <p class="system-info-text">
+                • FER Score: <b>{{ number_format($hasil->fer_stress_score ?? 0, 1) }}% × 30%</b>
             </p>
-            <p style="font-size: 0.9rem; margin: 0; font-weight: 600;">
-                • <b>= Final: {{ number_format($hasil->final_score ?? $hasil->nilai_fatigue, 1) }}%</b>
+            <p class="system-info-highlight" style="color: var(--primary);">
+                • Combined Index: <b>{{ number_format($finalScore, 1) }}%</b>
             </p>
         </div>
 
-        <div class="neo-box" style="background-color: var(--white); margin: 0; padding: 1.5rem;">
-            <h4 style="font-size: 1.1rem; border-bottom: 2px solid var(--dark); padding-bottom: 0.5rem; margin-bottom: 1rem;">
-                ATURAN YANG DIEVALUASI
+        <div class="neo-box system-info-box">
+            <h4 class="system-info-header">
+                RULE INFERENCE ENGINE
             </h4>
-            <p style="font-size: 0.9rem; margin-bottom: 0.5rem; font-weight: 600;">
-                • Fuzzy Rules: <b>5 Aturan Sugeno</b>
+            <p class="system-info-text">
+                • Aturan Terbaca: <b>10 Sugeno Rules (Orde Nol)</b>
             </p>
-            <p style="font-size: 0.9rem; margin-bottom: 0.5rem; font-weight: 600;">
-                • FER Model: <b>Face-API.js (TinyFaceDetector)</b>
+            <p class="system-info-text">
+                • Defuzzifikasi: <b>Weighted Average (WA)</b>
             </p>
-            <p style="font-size: 0.9rem; margin: 0; font-weight: 600;">
-                • Emotion Network: <b>FaceExpressionNet</b>
+            <p class="system-info-text" style="margin: 0;">
+                • AI Model: <b>FaceExpressionNet (Face-API)</b>
             </p>
         </div>
 
-        <div class="neo-box" style="background-color: var(--white); margin: 0; padding: 1.5rem;">
-            <h4 style="font-size: 1.1rem; border-bottom: 2px solid var(--dark); padding-bottom: 0.5rem; margin-bottom: 1rem;">
-                DB RECORD TRACKING
+        <div class="neo-box system-info-box">
+            <h4 class="system-info-header">
+                DB TRACKING ID
             </h4>
-            <p style="font-size: 0.9rem; margin-bottom: 0.5rem; font-weight: 600;">
-                • Record ID: <b>#{{ $hasil->id }}</b>
+            <p class="system-info-text">
+                • Record Serial: <b>#{{ $hasil->id }}</b>
             </p>
-            <p style="font-size: 0.9rem; margin-bottom: 0.5rem; font-weight: 600;">
-                • Tersimpan: <b>{{ $hasil->created_at->format('d M Y H:i:s') }}</b>
+            <p class="system-info-text">
+                • Tanggal Simpan: <b>{{ $hasil->created_at->format('d M Y, H:i') }} WIB</b>
             </p>
-            <p style="font-size: 0.9rem; margin: 0; font-weight: 600; color: var(--primary);">
-                • Status: <b>SAVED TO MYSQL</b>
+            <p class="system-info-highlight" style="color: var(--green);">
+                • MySQL Database Status: <b>SUCCESS</b>
             </p>
         </div>
     </div>
 
     <!-- Navigation Buttons -->
-    <div style="display: flex; gap: 2rem; justify-content: center; margin-top: 2rem; flex-wrap: wrap;">
+    <div class="nav-actions">
         <a href="{{ route('kuisioner') }}" class="neo-btn neo-btn-secondary" style="background-color: var(--yellow);">
             COBA LAGI
         </a>
         <a href="{{ route('recommendation') }}" class="neo-btn" style="background-color: var(--green); display: inline-flex; align-items: center; gap: 0.75rem;">
-            LIHAT SOLUSI ANTI-STRESS AI
-            <svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width: 1.25rem; height: 1.25rem;">
+            REKOMENDASI PERSONAL LENGKAP
+            <svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="btn-icon">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path>
             </svg>
         </a>
     </div>
 </div>
-
-<style>
-    @media (max-width: 768px) {
-        .result-grid {
-            grid-template-columns: 1fr !important;
-        }
-    }
-</style>
 @endsection

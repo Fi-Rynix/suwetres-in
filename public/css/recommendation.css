@@ -1,0 +1,256 @@
+/* Neo-Brutalist Grid and Card styling */
+.recom-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+.recom-card {
+    background-color: var(--white);
+    border: var(--border-width) solid var(--dark);
+    box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--dark);
+    padding: 1.8rem;
+    position: relative;
+    transition: all 0.15s ease;
+}
+.recom-card:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: 11px 11px 0 var(--dark);
+}
+.recom-card-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+    text-transform: uppercase;
+    border-bottom: 3px solid var(--dark);
+    padding-bottom: 0.4rem;
+    display: inline-block;
+}
+.recom-card-text {
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.5;
+    color: #222;
+}
+.indicator-pill {
+    display: inline-block;
+    padding: 0.25rem 0.6rem;
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    border: 2px solid var(--dark);
+    box-shadow: 2px 2px 0 var(--dark);
+}
+
+/* Card Variations for recommendations */
+.recom-card-alert {
+    background-color: #FFF0F5;
+    border-left: 10px solid var(--primary);
+}
+.recom-card-alert .recom-card-title {
+    color: var(--primary);
+}
+
+.recom-card-success {
+    background-color: #F0FAF6;
+    border-left: 10px solid var(--green);
+}
+.recom-card-success .recom-card-title {
+    color: var(--green);
+}
+
+.recom-card-warning {
+    background-color: #FFFDE5;
+    border-left: 10px solid var(--yellow);
+}
+.recom-card-warning .recom-card-title {
+    color: #AA8800;
+}
+
+.recom-card-info {
+    background-color: #F0F8FF;
+    border-left: 10px solid var(--secondary);
+}
+.recom-card-info .recom-card-title {
+    color: #007799;
+}
+
+.recom-card-purple {
+    background-color: #F8F0FF;
+    border-left: 10px solid var(--purple);
+}
+.recom-card-purple .recom-card-title {
+    color: var(--purple);
+}
+
+/* Page Layout Utilities */
+.recom-container {
+    max-width: 800px;
+    margin: 1rem auto;
+}
+
+.recom-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.recom-header-badge {
+    background-color: var(--purple) !important;
+    color: var(--white) !important;
+    margin: 0 !important;
+    transform: rotate(-0.5deg);
+}
+
+.recom-header-title {
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}
+
+.matrix-panel {
+    background-color: #FFFDE5;
+    padding: 2rem;
+    margin-bottom: 2.5rem;
+}
+
+.matrix-title {
+    font-size: 1.25rem;
+    border-bottom: 3px solid var(--dark);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.2rem;
+    text-transform: uppercase;
+}
+
+.insight-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.insight-card {
+    background: var(--white);
+    border: 2px solid var(--dark);
+    padding: 0.8rem;
+    box-shadow: 3px 3px 0 var(--dark);
+}
+
+.insight-card-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #555;
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+}
+
+.fer-insight-box {
+    background-color: var(--white);
+    border: 2px solid var(--dark);
+    box-shadow: 3px 3px 0 var(--dark);
+    padding: 0.8rem 1.2rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.action-panel {
+    background-color: var(--white);
+    padding: 2.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.action-panel-title {
+    font-size: 1.8rem;
+    border-bottom: 4px solid var(--dark);
+    padding-bottom: 0.8rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+}
+
+.action-panel-badge {
+    font-size: 1rem;
+    background-color: var(--yellow);
+    border: 2px solid var(--dark);
+    padding: 0.2rem 0.6rem;
+    font-weight: 700;
+}
+
+.action-lead-text {
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.5;
+    margin-bottom: 2rem;
+}
+
+.action-lead-text-alert {
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.5;
+    color: var(--primary);
+    margin-bottom: 2rem;
+}
+
+.action-subtitle {
+    font-size: 1.3rem;
+    margin-bottom: 1.2rem;
+    text-transform: uppercase;
+}
+
+.recom-actions {
+    margin-top: 2rem;
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-secondary-recom {
+    flex: 1;
+    min-width: 200px;
+    background-color: var(--yellow) !important;
+}
+
+.btn-primary-recom {
+    flex: 1;
+    min-width: 200px;
+    background-color: var(--purple) !important;
+    color: var(--white) !important;
+}
+
+/* Indicator Pill Colors */
+.bg-purple {
+    background-color: var(--purple) !important;
+    color: var(--white) !important;
+}
+.bg-primary {
+    background-color: var(--primary) !important;
+    color: var(--white) !important;
+}
+.bg-yellow {
+    background-color: var(--yellow) !important;
+    color: var(--dark) !important;
+}
+.bg-green {
+    background-color: var(--green) !important;
+    color: var(--dark) !important;
+}
+
+@media (max-width: 768px) {
+    .insight-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+@media (max-width: 600px) {
+    .recom-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
