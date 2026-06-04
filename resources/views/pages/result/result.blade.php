@@ -10,19 +10,22 @@
 
 @section('content')
 @php
-    // === 1. Calculate Psychological Fatigue Score ===
-    // inputs 1-10 scale. Average is scaled to percentage
-    // (Avg - 1) / 9 * 100
-    $avgPsychFatigue = ($hasil->kelelahan_setelah_istirahat + $hasil->kelelahan_aktivitas + $hasil->penurunan_produktivitas) / 3;
-    $psychFatiguePct = (($avgPsychFatigue - 1) / 9) * 100;
+    // === 1. Calculate Mood & Depressive Score ===
+    // mood_rendah (negative) + inverted kepuasan_hidup (positive → negative)
+    $moodDepressiveAvg = ($hasil->mood_rendah + (11 - $hasil->kepuasan_hidup)) / 2;
+    $moodDepressivePct = (($moodDepressiveAvg - 1) / 9) * 100;
     
-    // === 2. Calculate Academic Pressure Level ===
-    $avgAcademicPressure = ($hasil->tekanan_tugas + $hasil->kecemasan_deadline) / 2;
-    $academicPressurePct = (($avgAcademicPressure - 1) / 9) * 100;
+    // === 2. Calculate Anxiety & Stress Score ===
+    $anxietyStressAvg = ($hasil->kecemasan + $hasil->kewalahan + $hasil->sulit_rileks + $hasil->gejala_fisik_stres) / 4;
+    $anxietyStressPct = (($anxietyStressAvg - 1) / 9) * 100;
 
-    // === 3. Calculate Emotional Exhaustion Level ===
-    $avgEmotionalExhaustion = ($hasil->beban_mental + $hasil->keseimbangan_hidup) / 2;
-    $emotionalExhaustionPct = (($avgEmotionalExhaustion - 1) / 9) * 100;
+    // === 3. Calculate Cognitive Fatigue Score ===
+    $cognitiveFatigueAvg = ($hasil->kelelahan_mental + $hasil->gangguan_konsentrasi + $hasil->overthinking) / 3;
+    $cognitiveFatiguePct = (($cognitiveFatigueAvg - 1) / 9) * 100;
+
+    // === 4. Calculate Burnout & Motivation Score ===
+    $burnoutMotivationAvg = ($hasil->kehilangan_motivasi + $hasil->beban_mental) / 2;
+    $burnoutMotivationPct = (($burnoutMotivationAvg - 1) / 9) * 100;
 
     // Final score
     $finalScore = $hasil->final_score ?? $hasil->nilai_fatigue;
@@ -66,6 +69,14 @@
         ['key' => 'disgusted', 'label' => 'DISGUSTED', 'value' => $hasil->emotion_disgusted, 'color' => '#FF8800'],
         ['key' => 'angry',     'label' => 'ANGRY',     'value' => $hasil->emotion_angry,     'color' => 'var(--primary)'],
     ];
+
+    // === Helpers for positive variable display ===
+    function getPositiveIndicator($value, $label) {
+        if ($value >= 8) return ['label' => 'Sangat Baik', 'color' => 'var(--purple)', 'emoji' => '✨'];
+        if ($value >= 6) return ['label' => 'Baik', 'color' => 'var(--green)', 'emoji' => '🟢'];
+        if ($value >= 4) return ['label' => 'Cukup', 'color' => '#AA8800', 'emoji' => '🟡'];
+        return ['label' => 'Rendah', 'color' => 'var(--primary)', 'emoji' => '🔴'];
+    }
 @endphp
 
 <div class="result-container">
@@ -113,7 +124,7 @@
     </div>
 
     <!-- ========================================================== -->
-    <!-- ANALYTICS CARDS (DAILY ACTIVITIES & FUZZY VARIABLES) -->
+    <!-- ANALYTICS CARDS (DAILY ACTIVITIES & KEY INDICATORS) -->
     <!-- ========================================================== -->
     <div class="analytics-grid">
         <div class="analytics-card border-purple">
@@ -131,58 +142,105 @@
             </div>
         </div>
         <div class="analytics-card border-yellow">
-            <div class="analytics-card-label">Fokus Belajar</div>
-            <div class="analytics-card-value">{{ 11 - $hasil->fokus_belajar }} / 10</div>
-            @php
-                $fokusScore = 11 - $hasil->fokus_belajar;
-                if ($fokusScore <= 3) {
-                    $fokusLabel = 'Sangat Rendah';
-                    $fokusColor = 'var(--primary)';
-                    $fokusEmoji = '🔴';
-                } elseif ($fokusScore <= 6) {
-                    $fokusLabel = 'Sedang';
-                    $fokusColor = '#AA8800';
-                    $fokusEmoji = '🟡';
-                } elseif ($fokusScore <= 8) {
-                    $fokusLabel = 'Tinggi';
-                    $fokusColor = 'var(--green)';
-                    $fokusEmoji = '🟢';
-                } else {
-                    $fokusLabel = 'Sangat Tinggi';
-                    $fokusColor = 'var(--purple)';
-                    $fokusEmoji = '✨';
-                }
-            @endphp
-            <div class="analytics-card-desc" style="color: {{ $fokusColor }}; font-weight: 700;">
-                {{ $fokusEmoji }} {{ $fokusLabel }}
+            <div class="analytics-card-label">Kualitas Tidur</div>
+            <div class="analytics-card-value">{{ $hasil->kualitas_tidur }} / 10</div>
+            @php $ktInd = getPositiveIndicator($hasil->kualitas_tidur, 'Kualitas Tidur'); @endphp
+            <div class="analytics-card-desc" style="color: {{ $ktInd['color'] }}; font-weight: 700;">
+                {{ $ktInd['emoji'] }} {{ $ktInd['label'] }}
             </div>
         </div>
         <div class="analytics-card border-green">
-            <div class="analytics-card-label">Motivasi Kuliah</div>
-            <div class="analytics-card-value">{{ 11 - $hasil->motivasi_kuliah }} / 10</div>
-            @php
-                $motivasiScore = 11 - $hasil->motivasi_kuliah;
-                if ($motivasiScore <= 3) {
-                    $motivasiLabel = 'Sangat Rendah';
-                    $motivasiColor = 'var(--primary)';
-                    $motivasiEmoji = '🔴';
-                } elseif ($motivasiScore <= 6) {
-                    $motivasiLabel = 'Sedang';
-                    $motivasiColor = '#AA8800';
-                    $motivasiEmoji = '🟡';
-                } elseif ($motivasiScore <= 8) {
-                    $motivasiLabel = 'Tinggi';
-                    $motivasiColor = 'var(--green)';
-                    $motivasiEmoji = '🟢';
-                } else {
-                    $motivasiLabel = 'Sangat Tinggi';
-                    $motivasiColor = 'var(--purple)';
-                    $motivasiEmoji = '✨';
-                }
-            @endphp
-            <div class="analytics-card-desc" style="color: {{ $motivasiColor }}; font-weight: 700;">
-                {{ $motivasiEmoji }} {{ $motivasiLabel }}
+            <div class="analytics-card-label">Regulasi Emosi</div>
+            <div class="analytics-card-value">{{ $hasil->regulasi_emosi }} / 10</div>
+            @php $reInd = getPositiveIndicator($hasil->regulasi_emosi, 'Regulasi Emosi'); @endphp
+            <div class="analytics-card-desc" style="color: {{ $reInd['color'] }}; font-weight: 700;">
+                {{ $reInd['emoji'] }} {{ $reInd['label'] }}
             </div>
+        </div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- DETAILED CLINICAL RISK BADGES (FOR DEMO/PRESENTATION) -->
+    <!-- ========================================================== -->
+    <div style="margin-top: 1rem; margin-bottom: 3rem;">
+        <h3 class="system-info-title" style="margin-bottom: 1.25rem;">
+            🚨 Indikator Risiko Klinis Utama
+        </h3>
+        <div class="clinical-badges-grid">
+            
+            <!-- Badge 1: Overthinking Level -->
+            <div class="clinical-badge-card border-ot">
+                <div class="clinical-badge-tag">OVERTHINKING LEVEL</div>
+                <div class="clinical-badge-value">{{ $hasil->overthinking }}<span class="clinical-badge-max">/10</span></div>
+                @php
+                    $otScore = $hasil->overthinking;
+                    if ($otScore >= 8) {
+                        $otStatus = 'Kritis (High Loop)';
+                        $otDesc = 'Pikiran berputar tanpa henti secara konstan';
+                        $otClass = 'status-critical';
+                    } elseif ($otScore >= 5) {
+                        $otStatus = 'Sedang';
+                        $otDesc = 'Kecenderungan memikirkan banyak hal sekaligus';
+                        $otClass = 'status-warning';
+                    } else {
+                        $otStatus = 'Rendah (Stabil)';
+                        $otDesc = 'Fokus mental stabil dan terkendali';
+                        $otClass = 'status-healthy';
+                    }
+                @endphp
+                <div class="clinical-badge-status {{ $otClass }}">{{ $otStatus }}</div>
+                <div class="clinical-badge-desc">{{ $otDesc }}</div>
+            </div>
+
+            <!-- Badge 2: Anxiety Level -->
+            <div class="clinical-badge-card border-ax">
+                <div class="clinical-badge-tag">ANXIETY LEVEL</div>
+                <div class="clinical-badge-value">{{ $hasil->kecemasan }}<span class="clinical-badge-max">/10</span></div>
+                @php
+                    $axScore = $hasil->kecemasan;
+                    if ($axScore >= 8) {
+                        $axStatus = 'Klinis (Tinggi)';
+                        $axDesc = 'Kecemasan & kegelisahan tingkat klinis (GAD-7)';
+                        $axClass = 'status-critical';
+                    } elseif ($axScore >= 5) {
+                        $axStatus = 'Moderat (Sering)';
+                        $axDesc = 'Kekhawatiran harian yang cukup mengganggu';
+                        $axClass = 'status-warning';
+                    } else {
+                        $axStatus = 'Tenang (Minimal)';
+                        $axDesc = 'Tingkat kecemasan minimal dan terkendali';
+                        $axClass = 'status-healthy';
+                    }
+                @endphp
+                <div class="clinical-badge-status {{ $axClass }}">{{ $axStatus }}</div>
+                <div class="clinical-badge-desc">{{ $axDesc }}</div>
+            </div>
+
+            <!-- Badge 3: Burnout Risk -->
+            <div class="clinical-badge-card border-bo">
+                <div class="clinical-badge-tag">BURNOUT RISK</div>
+                @php
+                    // Burnout risk is computed using fatigue, loss of motivation, and mental burden
+                    $burnoutScore = ($hasil->nilai_fatigue + ($hasil->kehilangan_motivasi * 10) + ($hasil->beban_mental * 10)) / 3;
+                    if ($burnoutScore >= 75) {
+                        $boStatus = 'Risiko Tinggi';
+                        $boDesc = 'Ambang batas kelelahan mental & amotivasi kronis';
+                        $boClass = 'status-critical';
+                    } elseif ($burnoutScore >= 45) {
+                        $boStatus = 'Risiko Sedang';
+                        $boDesc = 'Kelelahan harian mulai menggerus produktivitas';
+                        $boClass = 'status-warning';
+                    } else {
+                        $boStatus = 'Aman';
+                        $boDesc = 'Cadangan energi mental & motivasi berada di titik optimal';
+                        $boClass = 'status-healthy';
+                    }
+                @endphp
+                <div class="clinical-badge-value">{{ number_format($burnoutScore, 0) }}%</div>
+                <div class="clinical-badge-status {{ $boClass }}">{{ $boStatus }}</div>
+                <div class="clinical-badge-desc">{{ $boDesc }}</div>
+            </div>
+
         </div>
     </div>
 
@@ -198,35 +256,44 @@
             </h3>
             
             <p class="panel-desc">
-                Sub-skor kelelahan psikologis dihitung secara ilmiah dari 10 parameter kondisi mental di kuisioner Anda:
+                Sub-skor kelelahan psikologis dihitung dari 12 parameter klinis yang diadaptasi dari PHQ-9, GAD-7, DASS-21, PSQI, DERS, dan WHO-5:
             </p>
 
             <div class="flex-col">
-                <!-- Row 1: Psychological Fatigue -->
+                <!-- Row 1: Mood & Depressive -->
                 <div class="breakdown-row">
-                    <span style="font-weight: 700; font-size: 0.95rem;">Psych Fatigue Score</span>
+                    <span style="font-weight: 700; font-size: 0.95rem;">Mood & Depressive</span>
                     <div class="breakdown-bar-outer">
-                        <div class="breakdown-bar-inner" data-width="{{ $psychFatiguePct }}" style="background-color: var(--primary);"></div>
+                        <div class="breakdown-bar-inner" data-width="{{ $moodDepressivePct }}" style="background-color: #3366FF;"></div>
                     </div>
-                    <span style="font-weight: 700; text-align: right; font-size: 0.95rem;">{{ number_format($psychFatiguePct, 0) }}%</span>
+                    <span style="font-weight: 700; text-align: right; font-size: 0.95rem;">{{ number_format($moodDepressivePct, 0) }}%</span>
                 </div>
 
-                <!-- Row 2: Academic Pressure -->
+                <!-- Row 2: Anxiety & Stress -->
                 <div class="breakdown-row">
-                    <span style="font-weight: 700; font-size: 0.95rem;">Academic Pressure</span>
+                    <span style="font-weight: 700; font-size: 0.95rem;">Anxiety & Stress</span>
                     <div class="breakdown-bar-outer">
-                        <div class="breakdown-bar-inner" data-width="{{ $academicPressurePct }}" style="background-color: var(--yellow);"></div>
+                        <div class="breakdown-bar-inner" data-width="{{ $anxietyStressPct }}" style="background-color: var(--primary);"></div>
                     </div>
-                    <span style="font-weight: 700; text-align: right; font-size: 0.95rem;">{{ number_format($academicPressurePct, 0) }}%</span>
+                    <span style="font-weight: 700; text-align: right; font-size: 0.95rem;">{{ number_format($anxietyStressPct, 0) }}%</span>
                 </div>
 
-                <!-- Row 3: Emotional Exhaustion -->
+                <!-- Row 3: Cognitive Fatigue -->
                 <div class="breakdown-row">
-                    <span style="font-weight: 700; font-size: 0.95rem;">Emotional Exhaustion</span>
+                    <span style="font-weight: 700; font-size: 0.95rem;">Cognitive Fatigue</span>
                     <div class="breakdown-bar-outer">
-                        <div class="breakdown-bar-inner" data-width="{{ $emotionalExhaustionPct }}" style="background-color: var(--purple);"></div>
+                        <div class="breakdown-bar-inner" data-width="{{ $cognitiveFatiguePct }}" style="background-color: var(--yellow);"></div>
                     </div>
-                    <span style="font-weight: 700; text-align: right; font-size: 0.95rem;">{{ number_format($emotionalExhaustionPct, 0) }}%</span>
+                    <span style="font-weight: 700; text-align: right; font-size: 0.95rem;">{{ number_format($cognitiveFatiguePct, 0) }}%</span>
+                </div>
+
+                <!-- Row 4: Burnout & Motivation -->
+                <div class="breakdown-row">
+                    <span style="font-weight: 700; font-size: 0.95rem;">Burnout & Motivation</span>
+                    <div class="breakdown-bar-outer">
+                        <div class="breakdown-bar-inner" data-width="{{ $burnoutMotivationPct }}" style="background-color: var(--purple);"></div>
+                    </div>
+                    <span style="font-weight: 700; text-align: right; font-size: 0.95rem;">{{ number_format($burnoutMotivationPct, 0) }}%</span>
                 </div>
             </div>
 
@@ -339,7 +406,7 @@
                 RULE INFERENCE ENGINE
             </h4>
             <p class="system-info-text">
-                • Aturan Terbaca: <b>10 Sugeno Rules (Orde Nol)</b>
+                • Aturan Terbaca: <b>14 Sugeno Rules (Orde Nol)</b>
             </p>
             <p class="system-info-text">
                 • Defuzzifikasi: <b>Weighted Average (WA)</b>
@@ -360,7 +427,7 @@
                 • Tanggal Simpan: <b>{{ $hasil->created_at->format('d M Y, H:i') }} WIB</b>
             </p>
             <p class="system-info-highlight" style="color: var(--green);">
-                • MySQL Database Status: <b>SUCCESS</b>
+                • Database Status: <b>SUCCESS</b>
             </p>
         </div>
     </div>

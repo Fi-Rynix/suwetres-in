@@ -9,7 +9,7 @@ class FuzzyController extends Controller
 {
     /**
      * Bobot kombinasi skor akhir.
-     * Fuzzy Sugeno = primary (analisis kelelahan dari aktivitas)
+     * Fuzzy Sugeno = primary (analisis kelelahan dari kuisioner klinis)
      * FER          = supporting (analisis stress dari ekspresi wajah)
      */
     private const FUZZY_WEIGHT = 0.7;
@@ -23,21 +23,25 @@ class FuzzyController extends Controller
         $jam_tidur   = $data['jam_tidur'];
         $screen_time = $data['screen_time'];
 
-        // === 10 Psychological inputs ===
-        $fokus_belajar               = $data['fokus_belajar'];
-        $kelelahan_setelah_istirahat = $data['kelelahan_setelah_istirahat'];
-        $tekanan_tugas               = $data['tekanan_tugas'];
-        $keseimbangan_hidup          = $data['keseimbangan_hidup'];
-        $penurunan_produktivitas     = $data['penurunan_produktivitas'];
-        $kecemasan_deadline          = $data['kecemasan_deadline'];
-        $dampak_screen_time          = $data['dampak_screen_time'];
-        $motivasi_kuliah             = $data['motivasi_kuliah'];
-        $kelelahan_aktivitas         = $data['kelelahan_aktivitas'];
-        $beban_mental                = $data['beban_mental'];
+        // === 12 Clinical Psychological Inputs ===
+        // Positive variables (high score = good condition)
+        $kualitas_tidur  = $data['kualitas_tidur'];
+        $kepuasan_hidup  = $data['kepuasan_hidup'];
+        $regulasi_emosi  = $data['regulasi_emosi'];
 
-        // Optional legacy inputs
-        $jumlah_tugas = $data['jumlah_tugas'] ?? null;
-        $aktivitas    = $data['aktivitas_organisasi'] ?? null;
+        // Negative variables (high score = bad condition)
+        $kelelahan_mental      = $data['kelelahan_mental'];
+        $gangguan_konsentrasi  = $data['gangguan_konsentrasi'];
+        $mood_rendah           = $data['mood_rendah'];
+        $kecemasan             = $data['kecemasan'];
+        $kewalahan             = $data['kewalahan'];
+        $dampak_screen_time    = $data['dampak_screen_time'];
+        $kehilangan_motivasi   = $data['kehilangan_motivasi'];
+        $dampak_emosi          = $data['dampak_emosi'];
+        $beban_mental          = $data['beban_mental'];
+        $overthinking          = $data['overthinking'];
+        $sulit_rileks          = $data['sulit_rileks'];
+        $gejala_fisik_stres    = $data['gejala_fisik_stres'];
 
         // Process FER data first so we can use it in Fuzzy rules
         $fer = session('fer_result');
@@ -47,48 +51,98 @@ class FuzzyController extends Controller
         // BAGIAN 1: FUZZY SUGENO (PRIMARY - 70%)
         // ============================================================
 
-        // 1. Invert scales for Focus and Motivation
-        // High difficulty focusing (Likert 10) -> Low focus (1)
-        $fokus = 11 - $fokus_belajar; 
-        // High lack of motivation (Likert 10) -> Low motivation (1)
-        $motivasi = 11 - $motivasi_kuliah;
+        // 1. Invert positive variables → higher = worse (for fatigue calculation)
+        //    Positive vars: kualitas_tidur, kepuasan_hidup, regulasi_emosi
+        $tidur_buruk        = 11 - $kualitas_tidur;     // High = poor sleep quality
+        $ketidakpuasan      = 11 - $kepuasan_hidup;     // High = life dissatisfaction
+        $disregulasi_emosi  = 11 - $regulasi_emosi;     // High = poor emotion regulation
 
-        $tekanan = $tekanan_tugas;
-        $beban = $beban_mental;
-        $kelelahan = $kelelahan_aktivitas;
+        // Negative variables used directly (high = bad = high fatigue)
+        // $kelelahan_mental, $gangguan_konsentrasi, $mood_rendah,
+        // $kecemasan, $kewalahan, $kehilangan_motivasi, $dampak_emosi, $beban_mental
 
         // 2. Fuzzifikasi
-        // Fokus (Rendah 1-5, Sedang 3-8, Tinggi 6-10)
-        $fokus_rendah = $this->membershipTurun($fokus, 3, 5);
-        $fokus_sedang = $this->membershipSegitiga($fokus, 3, 5.5, 8);
-        $fokus_tinggi = $this->membershipNaik($fokus, 6, 8);
+        // All psychological variables use consistent thresholds:
+        // Rendah: dominant at 1-3, falls to 0 at 5
+        // Sedang: rises from 3, peaks at 5.5, falls to 0 at 8
+        // Tinggi: rises from 6, fully high at 8+
 
-        // Tekanan Akademik (Rendah 1-5, Sedang 3-8, Tinggi 6-10)
-        $tekanan_rendah = $this->membershipTurun($tekanan, 3, 5);
-        $tekanan_sedang = $this->membershipSegitiga($tekanan, 3, 5.5, 8);
-        $tekanan_tinggi = $this->membershipNaik($tekanan, 6, 8);
+        // --- Kelelahan Mental ---
+        $km_rendah = $this->membershipTurun($kelelahan_mental, 3, 5);
+        $km_sedang = $this->membershipSegitiga($kelelahan_mental, 3, 5.5, 8);
+        $km_tinggi = $this->membershipNaik($kelelahan_mental, 6, 8);
 
-        // Motivasi (Rendah 1-5, Sedang 3-8, Tinggi 6-10)
-        $motivasi_rendah = $this->membershipTurun($motivasi, 3, 5);
-        $motivasi_sedang = $this->membershipSegitiga($motivasi, 3, 5.5, 8);
-        $motivasi_tinggi = $this->membershipNaik($motivasi, 6, 8);
+        // --- Gangguan Konsentrasi ---
+        $gk_rendah = $this->membershipTurun($gangguan_konsentrasi, 3, 5);
+        $gk_sedang = $this->membershipSegitiga($gangguan_konsentrasi, 3, 5.5, 8);
+        $gk_tinggi = $this->membershipNaik($gangguan_konsentrasi, 6, 8);
 
-        // Beban Mental (Rendah 1-5, Sedang 3-8, Tinggi 6-10)
-        $beban_rendah = $this->membershipTurun($beban, 3, 5);
-        $beban_sedang = $this->membershipSegitiga($beban, 3, 5.5, 8);
-        $beban_tinggi = $this->membershipNaik($beban, 6, 8);
+        // --- Mood Rendah ---
+        $mr_rendah = $this->membershipTurun($mood_rendah, 3, 5);
+        $mr_sedang = $this->membershipSegitiga($mood_rendah, 3, 5.5, 8);
+        $mr_tinggi = $this->membershipNaik($mood_rendah, 6, 8);
 
-        // Jam Tidur (Sedikit 0-5, Cukup 4-8, Banyak 7-12)
+        // --- Kecemasan ---
+        $kc_rendah = $this->membershipTurun($kecemasan, 3, 5);
+        $kc_sedang = $this->membershipSegitiga($kecemasan, 3, 5.5, 8);
+        $kc_tinggi = $this->membershipNaik($kecemasan, 6, 8);
+
+        // --- Kewalahan ---
+        $kw_rendah = $this->membershipTurun($kewalahan, 3, 5);
+        $kw_sedang = $this->membershipSegitiga($kewalahan, 3, 5.5, 8);
+        $kw_tinggi = $this->membershipNaik($kewalahan, 6, 8);
+
+        // --- Kehilangan Motivasi ---
+        $kmot_rendah = $this->membershipTurun($kehilangan_motivasi, 3, 5);
+        $kmot_sedang = $this->membershipSegitiga($kehilangan_motivasi, 3, 5.5, 8);
+        $kmot_tinggi = $this->membershipNaik($kehilangan_motivasi, 6, 8);
+
+        // --- Dampak Emosi ---
+        $de_rendah = $this->membershipTurun($dampak_emosi, 3, 5);
+        $de_sedang = $this->membershipSegitiga($dampak_emosi, 3, 5.5, 8);
+        $de_tinggi = $this->membershipNaik($dampak_emosi, 6, 8);
+
+        // --- Beban Mental ---
+        $bm_rendah = $this->membershipTurun($beban_mental, 3, 5);
+        $bm_sedang = $this->membershipSegitiga($beban_mental, 3, 5.5, 8);
+        $bm_tinggi = $this->membershipNaik($beban_mental, 6, 8);
+
+        // --- Overthinking ---
+        $ot_rendah = $this->membershipTurun($overthinking, 3, 5);
+        $ot_sedang = $this->membershipSegitiga($overthinking, 3, 5.5, 8);
+        $ot_tinggi = $this->membershipNaik($overthinking, 6, 8);
+
+        // --- Sulit Rileks ---
+        $sr_rendah = $this->membershipTurun($sulit_rileks, 3, 5);
+        $sr_sedang = $this->membershipSegitiga($sulit_rileks, 3, 5.5, 8);
+        $sr_tinggi = $this->membershipNaik($sulit_rileks, 6, 8);
+
+        // --- Gejala Fisik Stres ---
+        $gfs_rendah = $this->membershipTurun($gejala_fisik_stres, 3, 5);
+        $gfs_sedang = $this->membershipSegitiga($gejala_fisik_stres, 3, 5.5, 8);
+        $gfs_tinggi = $this->membershipNaik($gejala_fisik_stres, 6, 8);
+
+        // --- Tidur Buruk (inverted from kualitas_tidur) ---
+        $tb_rendah = $this->membershipTurun($tidur_buruk, 3, 5);
+        $tb_sedang = $this->membershipSegitiga($tidur_buruk, 3, 5.5, 8);
+        $tb_tinggi = $this->membershipNaik($tidur_buruk, 6, 8);
+
+        // --- Ketidakpuasan Hidup (inverted from kepuasan_hidup) ---
+        $kp_rendah = $this->membershipTurun($ketidakpuasan, 3, 5);
+        $kp_sedang = $this->membershipSegitiga($ketidakpuasan, 3, 5.5, 8);
+        $kp_tinggi = $this->membershipNaik($ketidakpuasan, 6, 8);
+
+        // --- Disregulasi Emosi (inverted from regulasi_emosi) ---
+        $dre_rendah = $this->membershipTurun($disregulasi_emosi, 3, 5);
+        $dre_sedang = $this->membershipSegitiga($disregulasi_emosi, 3, 5.5, 8);
+        $dre_tinggi = $this->membershipNaik($disregulasi_emosi, 6, 8);
+
+        // --- Jam Tidur (Sedikit 0-5, Cukup 4-8, Banyak 7-12) ---
         $tidur_sedikit = $this->membershipTurun($jam_tidur, 4, 5);
         $tidur_cukup   = $this->membershipSegitiga($jam_tidur, 4, 6, 8);
         $tidur_banyak  = $this->membershipNaik($jam_tidur, 7, 8);
 
-        // Kelelahan Aktivitas (Rendah 1-5, Sedang 3-8, Tinggi 6-10)
-        $kelelahan_rendah = $this->membershipTurun($kelelahan, 3, 5);
-        $kelelahan_sedang = $this->membershipSegitiga($kelelahan, 3, 5.5, 8);
-        $kelelahan_tinggi = $this->membershipNaik($kelelahan, 6, 8);
-
-        // Screen Time (Rendah 0-5, Sedang 4-9, Tinggi 8-15)
+        // --- Screen Time (Rendah 0-5, Sedang 4-9, Tinggi 8-15) ---
         $screen_rendah = $this->membershipTurun($screen_time, 4, 5);
         $screen_sedang = $this->membershipSegitiga($screen_time, 4, 6.5, 9);
         $screen_tinggi = $this->membershipNaik($screen_time, 8, 9);
@@ -103,44 +157,76 @@ class FuzzyController extends Controller
                 $ferData['emotions']['disgusted']
             );
         } else {
-            // Fallback ke proxy psikologis: beban mental + kecemasan deadline (max 20, bagi 20)
-            $mood_buruk = min(1.0, ($beban_mental + $kecemasan_deadline) / 20);
+            // Fallback ke proxy psikologis: mood_rendah + kecemasan (max 20, bagi 20)
+            $mood_buruk = min(1.0, ($mood_rendah + $kecemasan) / 20);
         }
 
-        // Rules & Inferensi Sugeno Orde Nol
+        // ============================================================
+        // 3. Rules & Inferensi Sugeno Orde Nol (12 Rules)
+        // ============================================================
         $rules = [];
 
-        // Rule 1: IF Fokus Rendah AND Tekanan Akademik Tinggi THEN Fatigue = 90
-        $rules[] = ['alpha' => min($fokus_rendah, $tekanan_tinggi), 'z' => 90];
+        // === HIGH FATIGUE RULES (z >= 75) ===
 
-        // Rule 2: IF Motivasi Rendah AND Beban Mental Tinggi THEN Fatigue = 85
-        $rules[] = ['alpha' => min($motivasi_rendah, $beban_tinggi), 'z' => 85];
+        // Rule 1: IF Kelelahan Mental Tinggi AND Mood Rendah Tinggi THEN Fatigue = 92
+        // Rationale: PHQ-9 core depression-fatigue comorbidity
+        $rules[] = ['alpha' => min($km_tinggi, $mr_tinggi), 'z' => 92];
 
-        // Rule 3: IF Tidur Sedikit AND Kelelahan Aktivitas Tinggi THEN Fatigue = 80
-        $rules[] = ['alpha' => min($tidur_sedikit, $kelelahan_tinggi), 'z' => 80];
+        // Rule 2: IF Kecemasan Tinggi AND Kewalahan Tinggi THEN Fatigue = 88
+        // Rationale: GAD-7 anxiety + DASS-21 stress overwhelm
+        $rules[] = ['alpha' => min($kc_tinggi, $kw_tinggi), 'z' => 88];
 
-        // Rule 4: IF Mood Buruk AND Screen Time Tinggi THEN Fatigue = 75
-        $rules[] = ['alpha' => min($mood_buruk, $screen_tinggi), 'z' => 75];
+        // Rule 3: IF Tidur Buruk Tinggi AND Gangguan Konsentrasi Tinggi THEN Fatigue = 85
+        // Rationale: Sleep-cognitive performance link (PSQI ↔ PHQ-9 item 7)
+        $rules[] = ['alpha' => min($tb_tinggi, $gk_tinggi), 'z' => 85];
 
-        // Rule 5: IF Fokus Tinggi AND Motivasi Tinggi THEN Fatigue = 20
-        $rules[] = ['alpha' => min($fokus_tinggi, $motivasi_tinggi), 'z' => 20];
+        // Rule 4: IF Kehilangan Motivasi Tinggi AND Beban Mental Tinggi THEN Fatigue = 82
+        // Rationale: Burnout syndrome (amotivation + mental overload)
+        $rules[] = ['alpha' => min($kmot_tinggi, $bm_tinggi), 'z' => 82];
 
-        // Rule 6 (Complementary): IF Fokus Sedang AND Tekanan Akademik Sedang THEN Fatigue = 50
-        $rules[] = ['alpha' => min($fokus_sedang, $tekanan_sedang), 'z' => 50];
+        // Rule 5: IF Mood Buruk (FER) AND Dampak Emosi Tinggi THEN Fatigue = 78
+        // Rationale: Emotional exhaustion validated by facial expression
+        $rules[] = ['alpha' => min($mood_buruk, $de_tinggi), 'z' => 78];
 
-        // Rule 7 (Complementary): IF Motivasi Sedang AND Beban Mental Sedang THEN Fatigue = 55
-        $rules[] = ['alpha' => min($motivasi_sedang, $beban_sedang), 'z' => 55];
+        // Rule 6: IF Disregulasi Emosi Tinggi AND Kecemasan Tinggi THEN Fatigue = 75
+        // Rationale: DERS + GAD link — poor regulation amplifies anxiety
+        $rules[] = ['alpha' => min($dre_tinggi, $kc_tinggi), 'z' => 75];
 
-        // Rule 8 (Complementary): IF Tidur Cukup AND Kelelahan Aktivitas Rendah THEN Fatigue = 30
-        $rules[] = ['alpha' => min($tidur_cukup, $kelelahan_rendah), 'z' => 30];
+        // === MID FATIGUE RULES (z 45-60) ===
 
-        // Rule 9 (Complementary): IF Mood Baik (1 - Mood Buruk) AND Screen Time Rendah THEN Fatigue = 15
-        $rules[] = ['alpha' => min(1 - $mood_buruk, $screen_rendah), 'z' => 15];
+        // Rule 7: IF Kelelahan Mental Sedang AND Kewalahan Sedang THEN Fatigue = 55
+        // Rationale: Mid-range fatigue accumulation
+        $rules[] = ['alpha' => min($km_sedang, $kw_sedang), 'z' => 55];
 
-        // Rule 10 (Complementary): IF Tidur Banyak AND Beban Mental Rendah THEN Fatigue = 10
-        $rules[] = ['alpha' => min($tidur_banyak, $beban_rendah), 'z' => 10];
+        // Rule 8: IF Gangguan Konsentrasi Sedang AND Beban Mental Sedang THEN Fatigue = 50
+        // Rationale: Mid-range cognitive burden
+        $rules[] = ['alpha' => min($gk_sedang, $bm_sedang), 'z' => 50];
 
-        // Defuzzifikasi Weighted Average
+        // === LOW FATIGUE RULES (z <= 30) ===
+
+        // Rule 9: IF Tidur Buruk Rendah AND Kelelahan Mental Rendah THEN Fatigue = 25
+        // Rationale: Good sleep + mental freshness = good recovery
+        $rules[] = ['alpha' => min($tb_rendah, $km_rendah), 'z' => 25];
+
+        // Rule 10: IF Mood Baik (1 - Mood Buruk) AND Ketidakpuasan Rendah THEN Fatigue = 20
+        // Rationale: Positive emotional outlook + life satisfaction
+        $rules[] = ['alpha' => min(1 - $mood_buruk, $kp_rendah), 'z' => 20];
+
+        // Rule 11: IF Kecemasan Rendah AND Disregulasi Emosi Rendah THEN Fatigue = 15
+        // Rationale: Emotional stability and calm state
+        $rules[] = ['alpha' => min($kc_rendah, $dre_rendah), 'z' => 15];
+
+        // Rule 12: IF Tidur Buruk Rendah AND Beban Mental Rendah THEN Fatigue = 10
+        // Rationale: Fully rested and unburdened
+        $rules[] = ['alpha' => min($tb_rendah, $bm_rendah), 'z' => 10];
+
+        // Rule 13: IF Overthinking Tinggi AND Sulit_Rileks Tinggi THEN Fatigue = 85
+        $rules[] = ['alpha' => min($ot_tinggi, $sr_tinggi), 'z' => 85];
+
+        // Rule 14: IF Gejala_Fisik_Stres Tinggi AND Kecemasan Tinggi THEN Fatigue = 90
+        $rules[] = ['alpha' => min($gfs_tinggi, $kc_tinggi), 'z' => 90];
+
+        // 4. Defuzzifikasi Weighted Average
         $pembilang = 0;
         $penyebut  = 0;
         foreach($rules as $r) {
@@ -181,25 +267,29 @@ class FuzzyController extends Controller
         // ============================================================
 
         $hasil = HasilAnalisis::create([
-            // Input kuisioner
+            // Input kuisioner (daily activities)
             'jam_tidur'   => $jam_tidur,
             'screen_time' => $screen_time,
 
-            // Pertanyaan Psikologis Likert
-            'fokus_belajar'               => $fokus_belajar,
-            'kelelahan_setelah_istirahat' => $kelelahan_setelah_istirahat,
-            'tekanan_tugas'               => $tekanan_tugas,
-            'keseimbangan_hidup'          => $keseimbangan_hidup,
-            'penurunan_produktivitas'     => $penurunan_produktivitas,
-            'kecemasan_deadline'          => $kecemasan_deadline,
-            'dampak_screen_time'          => $dampak_screen_time,
-            'motivasi_kuliah'             => $motivasi_kuliah,
-            'kelelahan_aktivitas'         => $kelelahan_aktivitas,
-            'beban_mental'                => $beban_mental,
+            // === NEW: Clinical Psychological Assessment ===
+            // Positive variables
+            'kualitas_tidur'  => $kualitas_tidur,
+            'kepuasan_hidup'  => $kepuasan_hidup,
+            'regulasi_emosi'  => $regulasi_emosi,
 
-            // Backward compatibility
-            'jumlah_tugas'         => $jumlah_tugas,
-            'aktivitas_organisasi' => $aktivitas,
+            // Negative variables
+            'kelelahan_mental'      => $kelelahan_mental,
+            'gangguan_konsentrasi'  => $gangguan_konsentrasi,
+            'mood_rendah'           => $mood_rendah,
+            'kecemasan'             => $kecemasan,
+            'kewalahan'             => $kewalahan,
+            'dampak_screen_time'    => $dampak_screen_time,
+            'kehilangan_motivasi'   => $kehilangan_motivasi,
+            'dampak_emosi'          => $dampak_emosi,
+            'beban_mental'          => $beban_mental,
+            'overthinking'          => $overthinking,
+            'sulit_rileks'          => $sulit_rileks,
+            'gejala_fisik_stres'    => $gejala_fisik_stres,
 
             // Hasil Fuzzy (primary)
             'nilai_fatigue' => $nilai_fatigue,

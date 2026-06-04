@@ -20,6 +20,16 @@
         </div>
     </div>
 
+    <!-- INSTRUKSI TIMEFRAME -->
+    <div class="question-card" style="background-color: #FFFDE5; border-left: 8px solid var(--yellow);">
+        <p style="font-size: 1.1rem; font-weight: 700; margin: 0; line-height: 1.5;">
+             Jawablah pertanyaan berikut berdasarkan kondisi yang Anda alami dalam <strong style="color: var(--primary);">7 hari terakhir</strong>.
+        </p>
+        <p style="font-size: 0.85rem; margin: 0.5rem 0 0 0; color: #555; font-weight: 600;">
+            Diadaptasi dari PHQ-9, GAD-7, DASS-21, PSQI, DERS, & WHO-5.
+        </p>
+    </div>
+
     <!-- DYNAMIC PROGRESS INDICATOR -->
     <div class="progress-container">
         <div style="font-weight: 700; font-size: 0.95rem; text-transform: uppercase;">Progress:</div>
@@ -54,14 +64,14 @@
         <div class="question-card activity-card">
             <div class="question-num" style="background-color: var(--yellow); color: var(--dark);">Harian 01</div>
             <label class="form-label" for="jam_tidur" style="font-size: 1.2rem; margin-bottom: 0.8rem;">
-                Berapa jam Anda tidur semalam? (0 - 12 Jam)
+                Berapa rata-rata jam tidur Anda per hari? (0 - 24 Jam)
             </label>
-            <input type="number" step="any" min="0" max="12" name="jam_tidur" id="jam_tidur" class="neo-input" 
-                   placeholder="Masukkan jumlah jam tidur (contoh: 6)" value="{{ old('jam_tidur') }}" required>
+            <input type="number" step="any" min="0" max="24" name="jam_tidur" id="jam_tidur" class="neo-input" 
+                   placeholder="Masukkan rata-rata jam tidur (contoh: 6)" value="{{ old('jam_tidur') }}" required>
             <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 0.75rem; font-weight: 700; color: #555;">
                 <span>Sedikit (0-5 Jam)</span>
                 <span>Cukup (4-8 Jam)</span>
-                <span>Banyak (7-12 Jam)</span>
+                <span>Banyak (7+ Jam)</span>
             </div>
         </div>
 
@@ -69,14 +79,14 @@
         <div class="question-card activity-card">
             <div class="question-num" style="background-color: var(--yellow); color: var(--dark);">Harian 02</div>
             <label class="form-label" for="screen_time" style="font-size: 1.2rem; margin-bottom: 0.8rem;">
-                Berapa lama Anda menatap layar HP/laptop hari ini? (0 - 15 Jam)
+                Berapa rata-rata screen time Anda per hari? (0 - 24 Jam)
             </label>
-            <input type="number" step="any" min="0" max="15" name="screen_time" id="screen_time" class="neo-input" 
+            <input type="number" step="any" min="0" max="24" name="screen_time" id="screen_time" class="neo-input" 
                    placeholder="Masukkan durasi screen time (contoh: 8)" value="{{ old('screen_time') }}" required>
             <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 0.75rem; font-weight: 700; color: #555;">
                 <span>Rendah (0-5 Jam)</span>
                 <span>Sedang (4-9 Jam)</span>
-                <span>Tinggi (8-15 Jam)</span>
+                <span>Tinggi (8+ Jam)</span>
             </div>
         </div>
 
@@ -84,61 +94,131 @@
         <!-- BAGIAN B: KONDISI PSIKOLOGIS (LIKERT 1-10) -->
         <!-- ========================================== -->
         <h2 style="font-size: 1.3rem; margin-top: 3rem; margin-bottom: 1rem; padding-left: 0.5rem; border-left: 8px solid var(--purple); text-transform: uppercase;">
-            Bagian B: Kondisi Psikologis Mahasiswa
+            Bagian B: Kondisi Psikologis (7 Hari Terakhir)
         </h2>
 
         @php
             $psikologisQuestions = [
                 [
-                    'field' => 'fokus_belajar',
+                    'field' => 'kualitas_tidur',
                     'num' => 'Psikologis 01',
-                    'q' => 'Saya merasa kesulitan fokus saat belajar hari ini.'
+                    'q' => 'Dalam 7 hari terakhir, seberapa puas Anda dengan kualitas tidur Anda?',
+                    'anchor_low' => '1 = Sangat Tidak Puas',
+                    'anchor_high' => '10 = Sangat Puas',
+                    'polarity' => 'positive',
                 ],
                 [
-                    'field' => 'kelelahan_setelah_istirahat',
+                    'field' => 'kelelahan_mental',
                     'num' => 'Psikologis 02',
-                    'q' => 'Saya merasa kelelahan meskipun sudah beristirahat.'
+                    'q' => 'Dalam 7 hari terakhir, seberapa sering Anda merasa mudah lelah secara mental?',
+                    'anchor_low' => '1 = Tidak Sama Sekali',
+                    'anchor_high' => '10 = Hampir Sepanjang Waktu',
+                    'polarity' => 'negative',
                 ],
                 [
-                    'field' => 'tekanan_tugas',
+                    'field' => 'gangguan_konsentrasi',
                     'num' => 'Psikologis 03',
-                    'q' => 'Saya merasa tekanan tugas kuliah cukup berat minggu ini.'
+                    'q' => 'Dalam 7 hari terakhir, seberapa terganggu konsentrasi Anda saat belajar atau mengerjakan tugas?',
+                    'anchor_low' => '1 = Tidak Terganggu',
+                    'anchor_high' => '10 = Sangat Terganggu',
+                    'polarity' => 'negative',
                 ],
                 [
-                    'field' => 'keseimbangan_hidup',
+                    'field' => 'mood_rendah',
                     'num' => 'Psikologis 04',
-                    'q' => 'Saya merasa sulit menjaga keseimbangan antara kuliah dan kehidupan pribadi.'
+                    'q' => 'Seberapa sering Anda merasa sedih atau putus asa?',
+                    'anchor_low' => '1 = Tidak Sama Sekali',
+                    'anchor_high' => '10 = Hampir Sepanjang Waktu',
+                    'polarity' => 'negative',
                 ],
                 [
-                    'field' => 'penurunan_produktivitas',
+                    'field' => 'kecemasan',
                     'num' => 'Psikologis 05',
-                    'q' => 'Saya merasa produktivitas saya menurun akhir-akhir ini.'
+                    'q' => 'Dalam 7 hari terakhir, seberapa sering Anda merasa cemas, gelisah, atau sulit merasa tenang?',
+                    'anchor_low' => '1 = Tidak Sama Sekali',
+                    'anchor_high' => '10 = Sangat Sering',
+                    'polarity' => 'negative',
                 ],
                 [
-                    'field' => 'kecemasan_deadline',
+                    'field' => 'kewalahan',
                     'num' => 'Psikologis 06',
-                    'q' => 'Saya merasa cemas terhadap deadline atau tugas yang dimiliki.'
+                    'q' => 'Dalam 7 hari terakhir, seberapa besar Anda merasa kewalahan oleh tuntutan kuliah dan aktivitas sehari-hari?',
+                    'anchor_low' => '1 = Tidak Kewalahan',
+                    'anchor_high' => '10 = Sangat Kewalahan',
+                    'polarity' => 'negative',
                 ],
                 [
                     'field' => 'dampak_screen_time',
                     'num' => 'Psikologis 07',
-                    'q' => 'Saya merasa screen time memengaruhi kualitas istirahat saya.'
+                    'q' => 'Dalam 7 hari terakhir, seberapa besar screen time memengaruhi kondisi mental atau emosional Anda?',
+                    'anchor_low' => '1 = Tidak Berpengaruh',
+                    'anchor_high' => '10 = Sangat Berpengaruh',
+                    'polarity' => 'negative',
                 ],
                 [
-                    'field' => 'motivasi_kuliah',
+                    'field' => 'kehilangan_motivasi',
                     'num' => 'Psikologis 08',
-                    'q' => 'Saya merasa kurang termotivasi dalam menjalani aktivitas kuliah.'
+                    'q' => 'Dalam 7 hari terakhir, seberapa sering Anda merasa kehilangan motivasi untuk menjalani aktivitas kuliah?',
+                    'anchor_low' => '1 = Tidak Pernah',
+                    'anchor_high' => '10 = Hampir Sepanjang Waktu',
+                    'polarity' => 'negative',
                 ],
                 [
-                    'field' => 'kelelahan_aktivitas',
+                    'field' => 'dampak_emosi',
                     'num' => 'Psikologis 09',
-                    'q' => 'Saya merasa mudah lelah saat menjalani aktivitas harian.'
+                    'q' => 'Dalam 7 hari terakhir, seberapa besar kondisi emosional Anda memengaruhi produktivitas belajar atau bekerja?',
+                    'anchor_low' => '1 = Tidak Memengaruhi',
+                    'anchor_high' => '10 = Sangat Memengaruhi',
+                    'polarity' => 'negative',
                 ],
                 [
                     'field' => 'beban_mental',
                     'num' => 'Psikologis 10',
-                    'q' => 'Saya merasa kondisi mental saya cukup terbebani akhir-akhir ini.'
-                ]
+                    'q' => 'Dalam 7 hari terakhir, seberapa besar beban mental yang Anda rasakan?',
+                    'anchor_low' => '1 = Sangat Ringan',
+                    'anchor_high' => '10 = Sangat Berat',
+                    'polarity' => 'negative',
+                ],
+                [
+                    'field' => 'kepuasan_hidup',
+                    'num' => 'Psikologis 11',
+                    'q' => 'Dalam 7 hari terakhir, seberapa puas Anda dengan kehidupan sehari-hari Anda secara keseluruhan?',
+                    'anchor_low' => '1 = Sangat Tidak Puas',
+                    'anchor_high' => '10 = Sangat Puas',
+                    'polarity' => 'positive',
+                ],
+                [
+                    'field' => 'regulasi_emosi',
+                    'num' => 'Psikologis 12',
+                    'q' => 'Dalam 7 hari terakhir, seberapa mudah Anda menenangkan diri ketika mengalami emosi yang kuat?',
+                    'anchor_low' => '1 = Sangat Sulit',
+                    'anchor_high' => '10 = Sangat Mudah',
+                    'polarity' => 'positive',
+                ],
+                [
+                    'field' => 'overthinking',
+                    'num' => 'Psikologis 13',
+                    'q' => 'Dalam 7 hari terakhir, seberapa sering pikiran Anda terus berputar memikirkan banyak hal sekaligus?',
+                    'anchor_low' => '1 = Tidak Sama Sekali',
+                    'anchor_high' => '10 = Hampir Sepanjang Waktu',
+                    'polarity' => 'negative',
+                ],
+                [
+                    'field' => 'sulit_rileks',
+                    'num' => 'Psikologis 14',
+                    'q' => 'Dalam 7 hari terakhir, seberapa sering Anda merasa sulit untuk rileks atau menenangkan diri?',
+                    'anchor_low' => '1 = Tidak Sama Sekali',
+                    'anchor_high' => '10 = Hampir Sepanjang Waktu',
+                    'polarity' => 'negative',
+                ],
+                [
+                    'field' => 'gejala_fisik_stres',
+                    'num' => 'Psikologis 15',
+                    'q' => 'Seberapa sering Anda mengalami gejala fisik saat tertekan (misalnya jantung berdebar, napas terasa pendek, atau tubuh terasa tegang)?',
+                    'anchor_low' => '1 = Tidak Sama Sekali',
+                    'anchor_high' => '10 = Sangat Sering',
+                    'polarity' => 'negative',
+                ],
             ];
         @endphp
 
@@ -148,6 +228,11 @@
                 <p style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; line-height: 1.4;">
                     {{ $q['q'] }}
                 </p>
+                @if ($q['polarity'] === 'positive')
+                    <div style="display: inline-block; font-size: 0.75rem; font-weight: 700; padding: 0.15rem 0.5rem; background-color: var(--green); border: 2px solid var(--dark); margin-bottom: 0.5rem;">
+                        POSITIF — skor tinggi = kondisi baik
+                    </div>
+                @endif
                 
                 <div class="likert-container">
                     @for ($val = 1; $val <= 10; $val++)
@@ -159,8 +244,8 @@
                     @endfor
                 </div>
                 <div class="likert-legend">
-                    <span>1 (Sangat Rendah / Tidak Sama Sekali)</span>
-                    <span>10 (Sangat Tinggi / Sangat Berat)</span>
+                    <span>{{ $q['anchor_low'] }}</span>
+                    <span>{{ $q['anchor_high'] }}</span>
                 </div>
             </div>
         @endforeach

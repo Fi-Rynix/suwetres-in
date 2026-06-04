@@ -7,8 +7,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const progressBar = document.getElementById('survey-progress');
     const progressText = document.getElementById('progress-text');
     
-    // Total fields to answer: 2 numbers + 10 Likerts = 12
-    const totalQuestions = 12;
+    // Total fields to answer: 2 numbers + 15 Likerts = 17
+    const totalQuestions = 17;
 
     function updateProgress() {
         let answered = 0;
@@ -21,11 +21,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const screenTimeField = document.getElementById('screen_time');
         if (screenTimeField && screenTimeField.value !== '') answered++;
 
-        // 3. Check 10 Likert questions
+        // 3. Check 15 Clinical Psychological Likert questions
         const fields = [
-            'fokus_belajar', 'kelelahan_setelah_istirahat', 'tekanan_tugas', 
-            'keseimbangan_hidup', 'penurunan_produktivitas', 'kecemasan_deadline', 
-            'dampak_screen_time', 'motivasi_kuliah', 'kelelahan_aktivitas', 'beban_mental'
+            // Positive variables
+            'kualitas_tidur', 'kepuasan_hidup', 'regulasi_emosi',
+            // Negative variables
+            'kelelahan_mental', 'gangguan_konsentrasi', 'mood_rendah', 
+            'kecemasan', 'kewalahan', 'dampak_screen_time', 
+            'kehilangan_motivasi', 'dampak_emosi', 'beban_mental',
+            'overthinking', 'sulit_rileks', 'gejala_fisik_stres'
         ];
 
         fields.forEach(function(field) {
