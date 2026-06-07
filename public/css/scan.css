@@ -180,3 +180,65 @@
     50% { top: 100%; }
     100% { top: 0%; }
 }
+
+@media (max-width: 768px) {
+    .scan-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.8rem;
+        margin-bottom: 1.5rem;
+    }
+    .scan-title {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .scan-description {
+        font-size: 0.85rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .webcam-wrapper {
+        box-shadow: 4px 4px 0 var(--dark);
+    }
+    
+    .face-guide-frame {
+        width: 130px;
+        height: 175px;
+    }
+    
+    .face-guide-label {
+        font-size: 0.65rem;
+        top: -12px;
+        padding: 1px 4px;
+    }
+    
+    .camera-status-badge {
+        font-size: 0.75rem;
+        padding: 0.2rem 0.5rem;
+        bottom: 5px;
+        left: 5px;
+    }
+    
+    .live-emotion-panel {
+        padding: 0.8rem;
+        box-shadow: 3px 3px 0 var(--dark);
+    }
+    
+    .live-emotion-dominant {
+        font-size: 1.25rem;
+    }
+    
+    .scan-actions {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+    
+    .scan-actions a,
+    .scan-actions button {
+        width: 100% !important;
+        flex: none !important;
+    }
+}
+

@@ -325,7 +325,7 @@
             </div>
 
             <!-- BUTTONS -->
-            <div style="margin-top: 3rem; display: flex; gap: 1.5rem; margin-bottom: 4rem;">
+            <div class="wizard-actions">
                 <button type="button" class="neo-btn btn-next" style="flex: 1; background-color: var(--green); display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;">
                     LANJUT <i data-lucide="arrow-right" style="width: 18px; height: 18px;"></i>
                 </button>
@@ -376,7 +376,7 @@
             @endforeach
 
             <!-- BUTTONS -->
-            <div style="margin-top: 3rem; display: flex; gap: 1.5rem; margin-bottom: 4rem;">
+            <div class="wizard-actions">
                 <button type="button" class="neo-btn neo-btn-secondary btn-prev" style="flex: 1; background-color: var(--yellow); display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;">
                     <i data-lucide="arrow-left" style="width: 18px; height: 18px;"></i> KEMBALI
                 </button>
@@ -430,7 +430,7 @@
             @endforeach
 
             <!-- BUTTONS -->
-            <div style="margin-top: 3rem; display: flex; gap: 1.5rem; margin-bottom: 4rem;">
+            <div class="wizard-actions">
                 <button type="button" class="neo-btn neo-btn-secondary btn-prev" style="flex: 1; background-color: var(--yellow); display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;">
                     <i data-lucide="arrow-left" style="width: 18px; height: 18px;"></i> KEMBALI
                 </button>
@@ -484,7 +484,7 @@
             @endforeach
 
             <!-- BUTTONS -->
-            <div style="margin-top: 3rem; display: flex; gap: 1.5rem; margin-bottom: 4rem;">
+            <div class="wizard-actions">
                 <button type="button" class="neo-btn neo-btn-secondary btn-prev" style="flex: 1; background-color: var(--yellow); display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;">
                     <i data-lucide="arrow-left" style="width: 18px; height: 18px;"></i> KEMBALI
                 </button>
@@ -538,7 +538,7 @@
             @endforeach
 
             <!-- BUTTONS -->
-            <div style="margin-top: 3rem; display: flex; gap: 1.5rem; margin-bottom: 4rem;">
+            <div class="wizard-actions">
                 <button type="button" class="neo-btn neo-btn-secondary btn-prev" style="flex: 1; background-color: var(--yellow); display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;">
                     <i data-lucide="arrow-left" style="width: 18px; height: 18px;"></i> KEMBALI
                 </button>
@@ -621,11 +621,11 @@
                 </div>
 
                 <!-- Submit and Back Actions -->
-                <div style="margin-top: 2.5rem; display: flex; gap: 1.5rem; flex-wrap: wrap;">
-                    <button type="button" class="neo-btn neo-btn-secondary btn-prev" style="flex: 1; background-color: var(--yellow); min-width: 150px; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                <div class="wizard-actions" style="margin-top: 2.5rem;">
+                    <button type="button" class="neo-btn neo-btn-secondary btn-prev" style="flex: 1; background-color: var(--yellow); display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;">
                         <i data-lucide="arrow-left" style="width: 18px; height: 18px;"></i> PERBAIKI JAWABAN
                     </button>
-                    <button type="submit" class="neo-btn" style="flex: 2; background-color: var(--green); min-width: 250px; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                    <button type="submit" class="neo-btn" style="flex: 2; background-color: var(--green); display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;">
                         MULAI ANALISIS WAJAH <i data-lucide="scan" style="width: 18px; height: 18px;"></i>
                     </button>
                 </div>

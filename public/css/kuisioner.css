@@ -346,25 +346,112 @@
     }
 }
 
-@media (max-width: 576px) {
+@media (max-width: 600px) {
     .step-progress-wrapper {
-        grid-template-columns: repeat(5, 1fr);
+        display: flex !important;
+        overflow-x: auto !important;
+        white-space: nowrap !important;
+        gap: 0.6rem !important;
+        padding: 0.2rem 0.2rem 0.6rem 0.2rem !important;
+        -webkit-overflow-scrolling: touch !important;
+        scroll-snap-type: x mandatory !important;
+        grid-template-columns: none !important;
     }
     .step-progress-item {
-        justify-content: center;
-        padding: 0.5rem 0.25rem;
+        flex: 0 0 110px !important;
+        scroll-snap-align: start !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
+        padding: 0.5rem !important;
+        box-sizing: border-box !important;
+        background-color: var(--white);
+        border: 2px solid var(--dark);
+        box-shadow: 2px 2px 0 var(--dark);
     }
     .step-progress-text {
-        display: none; /* Only show icons on mobile */
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        margin-top: 0.25rem !important;
+    }
+    .step-lbl {
+        font-size: 0.55rem !important;
+    }
+    .step-title {
+        font-size: 0.65rem !important;
+        max-width: 90px !important;
+        text-overflow: ellipsis !important;
+        overflow: hidden !important;
     }
     .step-progress-icon {
-        border: none;
-        background: transparent;
-        width: auto;
-        height: auto;
+        width: 24px !important;
+        height: 24px !important;
+        border: 2px solid var(--dark) !important;
+        background-color: #eee !important;
+        flex-shrink: 0 !important;
     }
-    .step-progress-item.active .step-progress-icon,
+    .step-progress-icon i {
+        width: 14px !important;
+        height: 14px !important;
+    }
+    .step-progress-item.active {
+        background-color: var(--yellow) !important;
+        box-shadow: 3px 3px 0 var(--dark) !important;
+    }
+    .step-progress-item.active .step-progress-icon {
+        background-color: var(--white) !important;
+    }
+    .step-progress-item.completed {
+        background-color: var(--green) !important;
+    }
     .step-progress-item.completed .step-progress-icon {
-        background: transparent;
+        background-color: var(--white) !important;
     }
 }
+
+@media (max-width: 480px) {
+    .likert-container {
+        grid-template-columns: repeat(5, 1fr) !important;
+        gap: 0.25rem !important;
+    }
+    .likert-option span {
+        padding: 0.6rem 0.2rem !important;
+        font-size: 0.9rem !important;
+        border-width: 2px !important;
+        box-shadow: 2px 2px 0 var(--dark) !important;
+        min-height: 44px !important;
+    }
+    .likert-option input:checked + span {
+        transform: translate(1px, 1px) !important;
+        box-shadow: 1px 1px 0 var(--dark) !important;
+    }
+    .likert-legend {
+        font-size: 0.65rem !important;
+        margin-top: 0.4rem !important;
+    }
+}
+
+/* Wizard Buttons Class */
+.wizard-actions {
+    margin-top: 2.5rem;
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+@media (max-width: 480px) {
+    .wizard-actions {
+        flex-direction: column !important;
+        gap: 1rem !important;
+        margin-top: 2rem !important;
+        margin-bottom: 2rem !important;
+    }
+    .wizard-actions button,
+    .wizard-actions a {
+        width: 100% !important;
+        flex: none !important;
+    }
+}
+

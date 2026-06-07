@@ -247,10 +247,109 @@
     .insight-grid {
         grid-template-columns: repeat(2, 1fr) !important;
     }
-}
-
-@media (max-width: 600px) {
     .recom-grid {
         grid-template-columns: 1fr !important;
     }
+    .action-panel-title {
+        font-size: 1.5rem;
+    }
 }
+
+@media (max-width: 480px) {
+    .recom-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .matrix-panel {
+        padding: 1.25rem 1rem !important;
+        margin-bottom: 1.5rem;
+    }
+    
+    .insight-grid {
+        grid-template-columns: 1fr !important;
+        gap: 0.6rem !important;
+    }
+    
+    .insight-card {
+        padding: 0.6rem !important;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-align: left;
+    }
+    
+    .insight-card-label {
+        margin-bottom: 0 !important;
+        font-size: 0.8rem !important;
+    }
+    
+    .fer-insight-box {
+        padding: 0.6rem 0.8rem !important;
+        font-size: 0.8rem !important;
+        line-height: 1.4;
+    }
+    
+    .action-panel {
+        padding: 1.5rem 1rem !important;
+    }
+    
+    .action-panel-title {
+        font-size: 1.25rem !important;
+        border-bottom-width: 3px;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .action-panel-badge {
+        font-size: 0.8rem !important;
+        padding: 0.1rem 0.4rem;
+    }
+    
+    .action-lead-text,
+    .action-lead-text-alert {
+        font-size: 0.9rem !important;
+        line-height: 1.4;
+        margin-bottom: 1.2rem;
+    }
+    
+    .action-subtitle {
+        font-size: 1.05rem !important;
+        margin-bottom: 1rem;
+    }
+    
+    .recom-card {
+        padding: 1.2rem !important;
+        border-left-width: 6px !important;
+        box-shadow: 4px 4px 0 var(--dark) !important;
+    }
+    
+    .recom-card-title {
+        font-size: 1.05rem !important;
+        margin-bottom: 0.5rem;
+        border-bottom-width: 2px;
+        padding-bottom: 0.2rem;
+    }
+    
+    .recom-card-text {
+        font-size: 0.85rem !important;
+        line-height: 1.4;
+    }
+    
+    .recom-actions {
+        flex-direction: column !important;
+        gap: 0.8rem !important;
+        margin-top: 1.5rem;
+    }
+    
+    .recom-actions a {
+        width: 100% !important;
+        text-align: center;
+        justify-content: center;
+        min-width: 0 !important;
+        flex: none !important;
+    }
+}
+
