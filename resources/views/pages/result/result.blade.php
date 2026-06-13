@@ -10,21 +10,26 @@
 
 @section('content')
 @php
+    // === Flatten relasi 1:1 ke local variables (kompatibilitas dengan sintaks lama) ===
+    $ah  = $hasil->aktivitasHarian;   // jam_tidur, screen_time
+    $psi = $hasil->psikologisKlinis;  // 15 variabel klinis
+    $fer = $hasil->ferScanner;        // detail emosi FER
+
     // === 1. Calculate Mood & Depressive Score ===
     // mood_rendah (negative) + inverted kepuasan_hidup (positive → negative)
-    $moodDepressiveAvg = ($hasil->mood_rendah + (11 - $hasil->kepuasan_hidup)) / 2;
+    $moodDepressiveAvg = ($psi->mood_rendah + (11 - $psi->kepuasan_hidup)) / 2;
     $moodDepressivePct = (($moodDepressiveAvg - 1) / 9) * 100;
-    
+
     // === 2. Calculate Anxiety & Stress Score ===
-    $anxietyStressAvg = ($hasil->kecemasan + $hasil->kewalahan + $hasil->sulit_rileks + $hasil->gejala_fisik_stres) / 4;
+    $anxietyStressAvg = ($psi->kecemasan + $psi->kewalahan + $psi->sulit_rileks + $psi->gejala_fisik_stres) / 4;
     $anxietyStressPct = (($anxietyStressAvg - 1) / 9) * 100;
 
     // === 3. Calculate Cognitive Fatigue Score ===
-    $cognitiveFatigueAvg = ($hasil->kelelahan_mental + $hasil->gangguan_konsentrasi + $hasil->overthinking) / 3;
+    $cognitiveFatigueAvg = ($psi->kelelahan_mental + $psi->gangguan_konsentrasi + $psi->overthinking) / 3;
     $cognitiveFatiguePct = (($cognitiveFatigueAvg - 1) / 9) * 100;
 
     // === 4. Calculate Burnout & Motivation Score ===
-    $burnoutMotivationAvg = ($hasil->kehilangan_motivasi + $hasil->beban_mental) / 2;
+    $burnoutMotivationAvg = ($psi->kehilangan_motivasi + $psi->beban_mental) / 2;
     $burnoutMotivationPct = (($burnoutMotivationAvg - 1) / 9) * 100;
 
     // Final score
@@ -61,13 +66,13 @@
 
     // === List 7 emotions for loop ===
     $emotionList = [
-        ['key' => 'happy',     'label' => 'HAPPY',     'value' => $hasil->emotion_happy,     'color' => 'var(--green)'],
-        ['key' => 'neutral',   'label' => 'NEUTRAL',   'value' => $hasil->emotion_neutral,   'color' => '#AAAAAA'],
-        ['key' => 'surprised', 'label' => 'SURPRISED', 'value' => $hasil->emotion_surprised, 'color' => 'var(--secondary)'],
-        ['key' => 'sad',       'label' => 'SAD',       'value' => $hasil->emotion_sad,       'color' => '#3366FF'],
-        ['key' => 'fearful',   'label' => 'FEARFUL',   'value' => $hasil->emotion_fearful,   'color' => 'var(--purple)'],
-        ['key' => 'disgusted', 'label' => 'DISGUSTED', 'value' => $hasil->emotion_disgusted, 'color' => '#FF8800'],
-        ['key' => 'angry',     'label' => 'ANGRY',     'value' => $hasil->emotion_angry,     'color' => 'var(--primary)'],
+        ['key' => 'happy',     'label' => 'HAPPY',     'value' => $fer?->emotion_happy,     'color' => 'var(--green)'],
+        ['key' => 'neutral',   'label' => 'NEUTRAL',   'value' => $fer?->emotion_neutral,   'color' => '#AAAAAA'],
+        ['key' => 'surprised', 'label' => 'SURPRISED', 'value' => $fer?->emotion_surprised, 'color' => 'var(--secondary)'],
+        ['key' => 'sad',       'label' => 'SAD',       'value' => $fer?->emotion_sad,       'color' => '#3366FF'],
+        ['key' => 'fearful',   'label' => 'FEARFUL',   'value' => $fer?->emotion_fearful,   'color' => 'var(--purple)'],
+        ['key' => 'disgusted', 'label' => 'DISGUSTED', 'value' => $fer?->emotion_disgusted, 'color' => '#FF8800'],
+        ['key' => 'angry',     'label' => 'ANGRY',     'value' => $fer?->emotion_angry,     'color' => 'var(--primary)'],
     ];
 
     // === Helpers for positive variable display ===
@@ -129,30 +134,30 @@
     <div class="analytics-grid">
         <div class="analytics-card border-purple">
             <div class="analytics-card-label">Tidur Semalam</div>
-            <div class="analytics-card-value">{{ $hasil->jam_tidur }} Jam</div>
-            <div class="analytics-card-desc" style="color: {{ $hasil->jam_tidur < 5 ? 'var(--primary)' : 'var(--green)' }}; font-weight: 700;">
-                {{ $hasil->jam_tidur < 5 ? '🔴 Kurang Tidur' : '🟢 Cukup Tidur' }}
+            <div class="analytics-card-value">{{ $ah->jam_tidur }} Jam</div>
+            <div class="analytics-card-desc" style="color: {{ $ah->jam_tidur < 5 ? 'var(--primary)' : 'var(--green)' }}; font-weight: 700;">
+                {{ $ah->jam_tidur < 5 ? '🔴 Kurang Tidur' : '🟢 Cukup Tidur' }}
             </div>
         </div>
         <div class="analytics-card border-secondary">
             <div class="analytics-card-label">Screen Time</div>
-            <div class="analytics-card-value">{{ $hasil->screen_time }} Jam</div>
-            <div class="analytics-card-desc" style="color: {{ $hasil->screen_time > 8 ? 'var(--primary)' : 'var(--green)' }}; font-weight: 700;">
-                {{ $hasil->screen_time > 8 ? '🔴 Berlebih (Detox)' : '🟢 Normal' }}
+            <div class="analytics-card-value">{{ $ah->screen_time }} Jam</div>
+            <div class="analytics-card-desc" style="color: {{ $ah->screen_time > 8 ? 'var(--primary)' : 'var(--green)' }}; font-weight: 700;">
+                {{ $ah->screen_time > 8 ? '🔴 Berlebih (Detox)' : '🟢 Normal' }}
             </div>
         </div>
         <div class="analytics-card border-yellow">
             <div class="analytics-card-label">Kualitas Tidur</div>
-            <div class="analytics-card-value">{{ $hasil->kualitas_tidur }} / 10</div>
-            @php $ktInd = getPositiveIndicator($hasil->kualitas_tidur, 'Kualitas Tidur'); @endphp
+            <div class="analytics-card-value">{{ $psi->kualitas_tidur }} / 10</div>
+            @php $ktInd = getPositiveIndicator($psi->kualitas_tidur, 'Kualitas Tidur'); @endphp
             <div class="analytics-card-desc" style="color: {{ $ktInd['color'] }}; font-weight: 700;">
                 {{ $ktInd['emoji'] }} {{ $ktInd['label'] }}
             </div>
         </div>
         <div class="analytics-card border-green">
             <div class="analytics-card-label">Regulasi Emosi</div>
-            <div class="analytics-card-value">{{ $hasil->regulasi_emosi }} / 10</div>
-            @php $reInd = getPositiveIndicator($hasil->regulasi_emosi, 'Regulasi Emosi'); @endphp
+            <div class="analytics-card-value">{{ $psi->regulasi_emosi }} / 10</div>
+            @php $reInd = getPositiveIndicator($psi->regulasi_emosi, 'Regulasi Emosi'); @endphp
             <div class="analytics-card-desc" style="color: {{ $reInd['color'] }}; font-weight: 700;">
                 {{ $reInd['emoji'] }} {{ $reInd['label'] }}
             </div>
@@ -171,9 +176,9 @@
             <!-- Badge 1: Overthinking Level -->
             <div class="clinical-badge-card border-ot">
                 <div class="clinical-badge-tag">OVERTHINKING LEVEL</div>
-                <div class="clinical-badge-value">{{ $hasil->overthinking }}<span class="clinical-badge-max">/10</span></div>
+                <div class="clinical-badge-value">{{ $psi->overthinking }}<span class="clinical-badge-max">/10</span></div>
                 @php
-                    $otScore = $hasil->overthinking;
+                    $otScore = $psi->overthinking;
                     if ($otScore >= 8) {
                         $otStatus = 'Kritis (High Loop)';
                         $otDesc = 'Pikiran berputar tanpa henti secara konstan';
@@ -195,9 +200,9 @@
             <!-- Badge 2: Anxiety Level -->
             <div class="clinical-badge-card border-ax">
                 <div class="clinical-badge-tag">ANXIETY LEVEL</div>
-                <div class="clinical-badge-value">{{ $hasil->kecemasan }}<span class="clinical-badge-max">/10</span></div>
+                <div class="clinical-badge-value">{{ $psi->kecemasan }}<span class="clinical-badge-max">/10</span></div>
                 @php
-                    $axScore = $hasil->kecemasan;
+                    $axScore = $psi->kecemasan;
                     if ($axScore >= 8) {
                         $axStatus = 'Klinis (Tinggi)';
                         $axDesc = 'Kecemasan & kegelisahan tingkat klinis (GAD-7)';
@@ -221,7 +226,7 @@
                 <div class="clinical-badge-tag">BURNOUT RISK</div>
                 @php
                     // Burnout risk is computed using fatigue, loss of motivation, and mental burden
-                    $burnoutScore = ($hasil->nilai_fatigue + ($hasil->kehilangan_motivasi * 10) + ($hasil->beban_mental * 10)) / 3;
+                    $burnoutScore = ($hasil->nilai_fatigue + ($psi->kehilangan_motivasi * 10) + ($psi->beban_mental * 10)) / 3;
                     if ($burnoutScore >= 75) {
                         $boStatus = 'Risiko Tinggi';
                         $boDesc = 'Ambang batas kelelahan mental & amotivasi kronis';
@@ -341,9 +346,9 @@
                 <div class="fer-dominant-box">
                     <div class="fer-dominant-label">EMOSI WAJAH DOMINAN</div>
                     <div class="fer-dominant-value">
-                        {{ $emotionEmoji[$hasil->dominant_emotion] ?? '😐' }}
-                        {{ $hasil->dominant_emotion ?? 'neutral' }}
-                        ({{ number_format(($hasil->dominant_emotion_score ?? 0) * 100, 1) }}%)
+                        {{ $emotionEmoji[$fer?->dominant_emotion] ?? '😐' }}
+                        {{ $fer?->dominant_emotion ?? 'neutral' }}
+                        ({{ number_format(($fer?->dominant_emotion_score ?? 0) * 100, 1) }}%)
                     </div>
                 </div>
 

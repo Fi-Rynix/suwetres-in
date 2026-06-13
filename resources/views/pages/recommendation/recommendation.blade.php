@@ -6,6 +6,11 @@
 
 @section('content')
 @php
+    // === Flatten relasi 1:1 ke local variables (kompatibilitas dengan sintaks lama) ===
+    $ah  = $hasil->aktivitasHarian;   // jam_tidur, screen_time
+    $psi = $hasil->psikologisKlinis;  // 15 variabel klinis
+    $fer = $hasil->ferScanner;        // detail emosi FER
+
     $finalStatus = $hasil->final_status ?? $hasil->status;
     $finalScore = $hasil->final_score ?? $hasil->nilai_fatigue;
 
@@ -66,59 +71,59 @@
         <div class="insight-grid">
             <div class="insight-card">
                 <div class="insight-card-label">Mood Rendah</div>
-                {!! getSeverityPill($hasil->mood_rendah) !!}
+                {!! getSeverityPill($psi->mood_rendah) !!}
             </div>
 
             <div class="insight-card">
                 <div class="insight-card-label">Kecemasan</div>
-                {!! getSeverityPill($hasil->kecemasan) !!}
+                {!! getSeverityPill($psi->kecemasan) !!}
             </div>
 
             <div class="insight-card">
                 <div class="insight-card-label">Gangguan Konsentrasi</div>
-                {!! getSeverityPill($hasil->gangguan_konsentrasi) !!}
+                {!! getSeverityPill($psi->gangguan_konsentrasi) !!}
             </div>
 
             <div class="insight-card">
                 <div class="insight-card-label">Kualitas Tidur</div>
-                {!! getPositivePill($hasil->kualitas_tidur) !!}
+                {!! getPositivePill($psi->kualitas_tidur) !!}
             </div>
 
             <div class="insight-card">
                 <div class="insight-card-label">Regulasi Emosi</div>
-                {!! getPositivePill($hasil->regulasi_emosi) !!}
+                {!! getPositivePill($psi->regulasi_emosi) !!}
             </div>
 
             <div class="insight-card">
                 <div class="insight-card-label">Beban Mental</div>
-                {!! getSeverityPill($hasil->beban_mental) !!}
+                {!! getSeverityPill($psi->beban_mental) !!}
             </div>
 
             <div class="insight-card">
                 <div class="insight-card-label">Kehilangan Motivasi</div>
-                {!! getSeverityPill($hasil->kehilangan_motivasi) !!}
+                {!! getSeverityPill($psi->kehilangan_motivasi) !!}
             </div>
 
             <div class="insight-card">
                 <div class="insight-card-label">Overthinking</div>
-                {!! getSeverityPill($hasil->overthinking) !!}
+                {!! getSeverityPill($psi->overthinking) !!}
             </div>
 
             <div class="insight-card">
                 <div class="insight-card-label">Sulit Rileks</div>
-                {!! getSeverityPill($hasil->sulit_rileks) !!}
+                {!! getSeverityPill($psi->sulit_rileks) !!}
             </div>
 
             <div class="insight-card">
                 <div class="insight-card-label">Gejala Fisik Stres</div>
-                {!! getSeverityPill($hasil->gejala_fisik_stres) !!}
+                {!! getSeverityPill($psi->gejala_fisik_stres) !!}
             </div>
         </div>
 
         @if ($hasil->fer_detected)
             <div class="fer-insight-box">
-                🎭 <b>AI Emotion Insight:</b> Ekspresi dominan Anda terdeteksi sebagai <b>{{ strtoupper($hasil->dominant_emotion) }} {{ $emotionEmoji[$hasil->dominant_emotion] ?? '' }}</b>.
-                @if (in_array($hasil->dominant_emotion, ['sad', 'angry', 'fearful', 'disgusted']))
+                🎭 <b>AI Emotion Insight:</b> Ekspresi dominan Anda terdeteksi sebagai <b>{{ strtoupper($fer?->dominant_emotion ?? 'neutral') }} {{ $emotionEmoji[$fer?->dominant_emotion ?? 'neutral'] ?? '' }}</b>.
+                @if (in_array($fer?->dominant_emotion, ['sad', 'angry', 'fearful', 'disgusted']))
                     Sistem mendeteksi adanya gejolak stres emosional yang tinggi pada ekspresi wajah Anda. Prioritaskan relaksasi sore ini!
                 @else
                     Struktur emosi luar Anda cukup stabil dan datar/netral. Upayakan menjaga kebugaran pikiran.
@@ -160,43 +165,43 @@
         <div class="recom-grid">
 
             <!-- 1. SLEEP HYGIENE (kualitas_tidur + jam_tidur) -->
-            @if ($hasil->kualitas_tidur <= 4 || $hasil->jam_tidur < 5)
+            @if ($psi->kualitas_tidur <= 4 || $ah->jam_tidur < 5)
                 <div class="recom-card recom-card-alert">
                     <div class="recom-card-title">🌙 Sleep Hygiene — Perbaikan Kualitas Tidur</div>
                     <div class="recom-card-text">
-                        <b>Kualitas tidur Anda rendah ({{ $hasil->kualitas_tidur }}/10) dan rata-rata hanya {{ $hasil->jam_tidur }} jam/hari.</b> Riset menunjukkan kualitas tidur yang buruk berkorelasi kuat dengan kelelahan mental dan penurunan konsentrasi (PSQI). Terapkan sleep hygiene: matikan layar 1 jam sebelum tidur, jaga suhu ruangan 18-22°C, dan tidur-bangun di jam yang sama setiap hari.
+                        <b>Kualitas tidur Anda rendah ({{ $psi->kualitas_tidur }}/10) dan rata-rata hanya {{ $ah->jam_tidur }} jam/hari.</b> Riset menunjukkan kualitas tidur yang buruk berkorelasi kuat dengan kelelahan mental dan penurunan konsentrasi (PSQI). Terapkan sleep hygiene: matikan layar 1 jam sebelum tidur, jaga suhu ruangan 18-22°C, dan tidur-bangun di jam yang sama setiap hari.
                     </div>
                 </div>
             @else
                 <div class="recom-card recom-card-success">
                     <div class="recom-card-title">🌙 Sleep Quality — Consistent Rest</div>
                     <div class="recom-card-text">
-                        Kualitas tidur Anda ({{ $hasil->kualitas_tidur }}/10) dan durasi ({{ $hasil->jam_tidur }} jam) sudah baik. Pertahankan jadwal tidur yang konsisten agar ritme sirkadian tubuh Anda tetap seimbang. Hindari begadang nonton serial/main game!
+                        Kualitas tidur Anda ({{ $psi->kualitas_tidur }}/10) dan durasi ({{ $ah->jam_tidur }} jam) sudah baik. Pertahankan jadwal tidur yang konsisten agar ritme sirkadian tubuh Anda tetap seimbang. Hindari begadang nonton serial/main game!
                     </div>
                 </div>
             @endif
 
             <!-- 2. MOOD RESTORATION (mood_rendah + dominant_emotion) -->
-            @if ($hasil->mood_rendah >= 7 || $hasil->dominant_emotion == 'sad')
+            @if ($psi->mood_rendah >= 7 || $fer?->dominant_emotion == 'sad')
                 <div class="recom-card recom-card-info">
                     <div class="recom-card-title">😔 Mood Restoration — Pemulihan Suasana Hati</div>
                     <div class="recom-card-text">
-                        <b>Mood rendah Anda ({{ $hasil->mood_rendah }}/10) menunjukkan gejala depresif ringan-sedang (PHQ-2).</b> Lakukan aktivitas yang meningkatkan mood secara natural: jalan kaki 15 menit di luar ruangan (paparan sinar matahari meningkatkan serotonin), dengarkan musik favorit, atau hubungi teman dekat/keluarga untuk berbicara. Jika perasaan sedih/putus asa menetap lebih dari 2 minggu, pertimbangkan konsultasi dengan konselor kampus.
+                        <b>Mood rendah Anda ({{ $psi->mood_rendah }}/10) menunjukkan gejala depresif ringan-sedang (PHQ-2).</b> Lakukan aktivitas yang meningkatkan mood secara natural: jalan kaki 15 menit di luar ruangan (paparan sinar matahari meningkatkan serotonin), dengarkan musik favorit, atau hubungi teman dekat/keluarga untuk berbicara. Jika perasaan sedih/putus asa menetap lebih dari 2 minggu, pertimbangkan konsultasi dengan konselor kampus.
                     </div>
                 </div>
             @endif
 
             <!-- 3. ANXIETY COPING (kecemasan + kewalahan) -->
-            @if ($hasil->kecemasan >= 7 || $hasil->kewalahan >= 7)
+            @if ($psi->kecemasan >= 7 || $psi->kewalahan >= 7)
                 <div class="recom-card recom-card-purple">
                     <div class="recom-card-title">😰 Anxiety Coping — Manajemen Kecemasan</div>
                     <div class="recom-card-text">
-                        @if ($hasil->kecemasan >= 7 && $hasil->kewalahan >= 7)
-                            <b>Kecemasan ({{ $hasil->kecemasan }}/10) DAN kewalahan ({{ $hasil->kewalahan }}/10) Anda sama-sama tinggi.</b>
-                        @elseif ($hasil->kecemasan >= 7)
-                            <b>Kecemasan Anda ({{ $hasil->kecemasan }}/10) tergolong tinggi (GAD-7 equivalent).</b>
+                        @if ($psi->kecemasan >= 7 && $psi->kewalahan >= 7)
+                            <b>Kecemasan ({{ $psi->kecemasan }}/10) DAN kewalahan ({{ $psi->kewalahan }}/10) Anda sama-sama tinggi.</b>
+                        @elseif ($psi->kecemasan >= 7)
+                            <b>Kecemasan Anda ({{ $psi->kecemasan }}/10) tergolong tinggi (GAD-7 equivalent).</b>
                         @else
-                            <b>Rasa kewalahan Anda ({{ $hasil->kewalahan }}/10) sangat tinggi (DASS-21 Stress).</b>
+                            <b>Rasa kewalahan Anda ({{ $psi->kewalahan }}/10) sangat tinggi (DASS-21 Stress).</b>
                         @endif
                         Lakukan teknik pernapasan 4-7-8: tarik napas 4 detik, tahan 7 detik, embuskan perlahan 8 detik. Ulangi 4 siklus. Kemudian buat daftar prioritas tugas — pecah tugas besar menjadi langkah kecil untuk mengurangi rasa kewalahan.
                     </div>
@@ -204,16 +209,16 @@
             @endif
 
             <!-- 4. FOCUS RECOVERY (gangguan_konsentrasi + kelelahan_mental) -->
-            @if ($hasil->gangguan_konsentrasi >= 7 || $hasil->kelelahan_mental >= 7)
+            @if ($psi->gangguan_konsentrasi >= 7 || $psi->kelelahan_mental >= 7)
                 <div class="recom-card recom-card-warning">
                     <div class="recom-card-title">🧠 Focus Recovery — Pemulihan Konsentrasi</div>
                     <div class="recom-card-text">
-                        @if ($hasil->gangguan_konsentrasi >= 7 && $hasil->kelelahan_mental >= 7)
-                            <b>Konsentrasi terganggu ({{ $hasil->gangguan_konsentrasi }}/10) dan kelelahan mental tinggi ({{ $hasil->kelelahan_mental }}/10).</b>
-                        @elseif ($hasil->gangguan_konsentrasi >= 7)
-                            <b>Konsentrasi Anda sangat terganggu ({{ $hasil->gangguan_konsentrasi }}/10, PHQ-9 item 7).</b>
+                        @if ($psi->gangguan_konsentrasi >= 7 && $psi->kelelahan_mental >= 7)
+                            <b>Konsentrasi terganggu ({{ $psi->gangguan_konsentrasi }}/10) dan kelelahan mental tinggi ({{ $psi->kelelahan_mental }}/10).</b>
+                        @elseif ($psi->gangguan_konsentrasi >= 7)
+                            <b>Konsentrasi Anda sangat terganggu ({{ $psi->gangguan_konsentrasi }}/10, PHQ-9 item 7).</b>
                         @else
-                            <b>Kelelahan mental Anda tinggi ({{ $hasil->kelelahan_mental }}/10, DASS-21).</b>
+                            <b>Kelelahan mental Anda tinggi ({{ $psi->kelelahan_mental }}/10, DASS-21).</b>
                         @endif
                         Gunakan metode Pomodoro: <b>25 menit fokus penuh</b> (tanpa tab media sosial/HP), diikuti <b>5 menit istirahat total</b>. Juga lakukan micro-break setiap 20 menit: tatap objek 20 kaki jauhnya selama 20 detik (aturan 20-20-20).
                     </div>
@@ -221,33 +226,33 @@
             @endif
 
             <!-- 5. DIGITAL DETOX (dampak_screen_time + screen_time) -->
-            @if ($hasil->dampak_screen_time >= 7 || $hasil->screen_time > 8)
+            @if ($psi->dampak_screen_time >= 7 || $ah->screen_time > 8)
                 <div class="recom-card recom-card-info">
                     <div class="recom-card-title">📱 Digital Detox — Kurangi Paparan Layar</div>
                     <div class="recom-card-text">
-                        <b>Screen time Anda {{ $hasil->screen_time }} jam/hari dengan dampak mental {{ $hasil->dampak_screen_time }}/10.</b> Radiasi cahaya biru layar mengganggu produksi melatonin dan meningkatkan kelelahan mata. Lakukan detoks layar minimal 1 jam penuh sebelum tidur. Ganti dengan membaca buku fisik atau mendengarkan musik santai. Aktifkan mode grayscale di HP Anda untuk mengurangi daya tarik scrolling.
+                        <b>Screen time Anda {{ $ah->screen_time }} jam/hari dengan dampak mental {{ $psi->dampak_screen_time }}/10.</b> Radiasi cahaya biru layar mengganggu produksi melatonin dan meningkatkan kelelahan mata. Lakukan detoks layar minimal 1 jam penuh sebelum tidur. Ganti dengan membaca buku fisik atau mendengarkan musik santai. Aktifkan mode grayscale di HP Anda untuk mengurangi daya tarik scrolling.
                     </div>
                 </div>
             @else
                 <div class="recom-card recom-card-success">
                     <div class="recom-card-title">📱 Smart Device Balance</div>
                     <div class="recom-card-text">
-                        Durasi screen time Anda ({{ $hasil->screen_time }} jam) dan dampak mentalnya ({{ $hasil->dampak_screen_time }}/10) masih terkendali. Selaraskan aktivitas digital dengan rehat visual singkat setiap 20 menit menatap layar.
+                        Durasi screen time Anda ({{ $ah->screen_time }} jam) dan dampak mentalnya ({{ $psi->dampak_screen_time }}/10) masih terkendali. Selaraskan aktivitas digital dengan rehat visual singkat setiap 20 menit menatap layar.
                     </div>
                 </div>
             @endif
 
             <!-- 6. EMOTION REGULATION (regulasi_emosi + dampak_emosi) -->
-            @if ($hasil->regulasi_emosi <= 4 || $hasil->dampak_emosi >= 7)
+            @if ($psi->regulasi_emosi <= 4 || $psi->dampak_emosi >= 7)
                 <div class="recom-card recom-card-purple">
                     <div class="recom-card-title">💜 Emotion Regulation — Pengelolaan Emosi</div>
                     <div class="recom-card-text">
-                        @if ($hasil->regulasi_emosi <= 4 && $hasil->dampak_emosi >= 7)
-                            <b>Kemampuan regulasi emosi Anda rendah ({{ $hasil->regulasi_emosi }}/10) dan emosi sangat memengaruhi produktivitas ({{ $hasil->dampak_emosi }}/10).</b>
-                        @elseif ($hasil->regulasi_emosi <= 4)
-                            <b>Anda merasa sulit menenangkan diri saat emosi kuat ({{ $hasil->regulasi_emosi }}/10, DERS-adapted).</b>
+                        @if ($psi->regulasi_emosi <= 4 && $psi->dampak_emosi >= 7)
+                            <b>Kemampuan regulasi emosi Anda rendah ({{ $psi->regulasi_emosi }}/10) dan emosi sangat memengaruhi produktivitas ({{ $psi->dampak_emosi }}/10).</b>
+                        @elseif ($psi->regulasi_emosi <= 4)
+                            <b>Anda merasa sulit menenangkan diri saat emosi kuat ({{ $psi->regulasi_emosi }}/10, DERS-adapted).</b>
                         @else
-                            <b>Kondisi emosional Anda sangat memengaruhi produktivitas ({{ $hasil->dampak_emosi }}/10).</b>
+                            <b>Kondisi emosional Anda sangat memengaruhi produktivitas ({{ $psi->dampak_emosi }}/10).</b>
                         @endif
                         Praktikkan teknik grounding 5-4-3-2-1: sebutkan 5 hal yang Anda lihat, 4 yang disentuh, 3 yang didengar, 2 yang dicium, 1 yang dirasakan. Kemudian lakukan journaling — tulis semua kecemasan dan emosi yang mengganjal untuk melepaskan beban pikiran.
                     </div>
@@ -255,37 +260,37 @@
             @endif
 
             <!-- 7. MOTIVATION BOOST (kehilangan_motivasi) -->
-            @if ($hasil->kehilangan_motivasi >= 7)
+            @if ($psi->kehilangan_motivasi >= 7)
                 <div class="recom-card recom-card-alert">
                     <div class="recom-card-title">🔥 Motivation Boost — Pemulihan Motivasi</div>
                     <div class="recom-card-text">
-                        <b>Anda sering kehilangan motivasi kuliah ({{ $hasil->kehilangan_motivasi }}/10).</b> Ini adalah tanda awal burnout akademik. Coba teknik "2-Minute Rule": mulai tugas apapun hanya selama 2 menit — momentum awal sering memicu kelanjutan. Tulis ulang tujuan jangka pendek (minggu ini) dan tujuan jangka panjang (semester ini) untuk mengembalikan sense of purpose. Reward diri Anda setelah menyelesaikan setiap tugas kecil.
+                        <b>Anda sering kehilangan motivasi kuliah ({{ $psi->kehilangan_motivasi }}/10).</b> Ini adalah tanda awal burnout akademik. Coba teknik "2-Minute Rule": mulai tugas apapun hanya selama 2 menit — momentum awal sering memicu kelanjutan. Tulis ulang tujuan jangka pendek (minggu ini) dan tujuan jangka panjang (semester ini) untuk mengembalikan sense of purpose. Reward diri Anda setelah menyelesaikan setiap tugas kecil.
                     </div>
                 </div>
             @endif
 
             <!-- 8. OVERTHINKING & SULIT RILEKS (overthinking + sulit_rileks) -->
-            @if ($hasil->overthinking >= 7 || $hasil->sulit_rileks >= 7)
+            @if ($psi->overthinking >= 7 || $psi->sulit_rileks >= 7)
                 <div class="recom-card recom-card-warning">
                     <div class="recom-card-title">🌀 Mind Calming — Mengatasi Overthinking & Sulit Rileks</div>
                     <div class="recom-card-text">
-                        <b>Overthinking Anda ({{ $hasil->overthinking }}/10) atau tingkat kesulitan rileks ({{ $hasil->sulit_rileks }}/10) tergolong tinggi.</b> Pikiran yang terus berputar memicu ketegangan saraf konstan. Lakukan latihan <i>mindfulness grounding</i>: sadari 5 benda sekitar, atau dengarkan suara alam/ambient tanpa distorsi. Terapkan teknik "brain dump" dengan menuliskan semua pikiran yang berputar di atas kertas sebelum tidur agar otak bisa melepaskan beban tugas.
+                        <b>Overthinking Anda ({{ $psi->overthinking }}/10) atau tingkat kesulitan rileks ({{ $psi->sulit_rileks }}/10) tergolong tinggi.</b> Pikiran yang terus berputar memicu ketegangan saraf konstan. Lakukan latihan <i>mindfulness grounding</i>: sadari 5 benda sekitar, atau dengarkan suara alam/ambient tanpa distorsi. Terapkan teknik "brain dump" dengan menuliskan semua pikiran yang berputar di atas kertas sebelum tidur agar otak bisa melepaskan beban tugas.
                     </div>
                 </div>
             @endif
 
             <!-- 9. GEJALA FISIK STRES (gejala_fisik_stres) -->
-            @if ($hasil->gejala_fisik_stres >= 7)
+            @if ($psi->gejala_fisik_stres >= 7)
                 <div class="recom-card recom-card-alert">
                     <div class="recom-card-title">💓 Somatic Relief — Mengurangi Gejala Fisik Stres</div>
                     <div class="recom-card-text">
-                        <b>Tingkat gejala fisik stres Anda tinggi ({{ $hasil->gejala_fisik_stres }}/10) seperti jantung berdebar atau otot tegang.</b> Ini tanda sistem saraf simpatik Anda terlalu aktif. Lakukan peregangan otot progresif (Progressive Muscle Relaxation) selama 10 menit: tegangkan lalu rilekskan kelompok otot dari kaki hingga wajah bergantian. Mandi air hangat atau kompres hangat di area leher belakang juga dapat membantu meredakan ketegangan fisik secara langsung.
+                        <b>Tingkat gejala fisik stres Anda tinggi ({{ $psi->gejala_fisik_stres }}/10) seperti jantung berdebar atau otot tegang.</b> Ini tanda sistem saraf simpatik Anda terlalu aktif. Lakukan peregangan otot progresif (Progressive Muscle Relaxation) selama 10 menit: tegangkan lalu rilekskan kelompok otot dari kaki hingga wajah bergantian. Mandi air hangat atau kompres hangat di area leher belakang juga dapat membantu meredakan ketegangan fisik secara langsung.
                     </div>
                 </div>
             @endif
 
             <!-- CATCH-ALL: If everything is fine -->
-            @if ($tier === 'low' && $hasil->kualitas_tidur > 4 && $hasil->jam_tidur >= 5 && $hasil->mood_rendah < 7 && $hasil->kecemasan < 7 && $hasil->kewalahan < 7 && $hasil->gangguan_konsentrasi < 7 && $hasil->kelelahan_mental < 7 && $hasil->dampak_screen_time < 7 && $hasil->screen_time <= 8 && $hasil->regulasi_emosi > 4 && $hasil->dampak_emosi < 7 && $hasil->kehilangan_motivasi < 7 && $hasil->overthinking < 7 && $hasil->sulit_rileks < 7 && $hasil->gejala_fisik_stres < 7)
+            @if ($tier === 'low' && $psi->kualitas_tidur > 4 && $ah->jam_tidur >= 5 && $psi->mood_rendah < 7 && $psi->kecemasan < 7 && $psi->kewalahan < 7 && $psi->gangguan_konsentrasi < 7 && $psi->kelelahan_mental < 7 && $psi->dampak_screen_time < 7 && $ah->screen_time <= 8 && $psi->regulasi_emosi > 4 && $psi->dampak_emosi < 7 && $psi->kehilangan_motivasi < 7 && $psi->overthinking < 7 && $psi->sulit_rileks < 7 && $psi->gejala_fisik_stres < 7)
                 <div class="recom-card recom-card-success">
                     <div class="recom-card-title">🌟 Mindfulness & Maintenance</div>
                     <div class="recom-card-text">
