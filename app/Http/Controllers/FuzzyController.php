@@ -3,15 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\HasilAnalisis;
+use Illuminate\Support\Facades\DB;
+use App\Models\Analisis;
+use App\Models\AktivitasHarian;
+use App\Models\PsikologisKlinis;
+use App\Models\FerScanner;
 
 class FuzzyController extends Controller
 {
-    /**
-     * Bobot kombinasi skor akhir.
-     * Fuzzy Sugeno = primary (analisis kelelahan dari kuisioner klinis)
-     * FER          = supporting (analisis stress dari ekspresi wajah)
-     */
     private const FUZZY_WEIGHT = 0.7;
     private const FER_WEIGHT   = 0.3;
 
@@ -47,25 +46,10 @@ class FuzzyController extends Controller
         $fer = session('fer_result');
         $ferData = $this->processFERData($fer);
 
-        // ============================================================
-        // BAGIAN 1: FUZZY SUGENO (PRIMARY - 70%)
-        // ============================================================
-
-        // 1. Invert positive variables → higher = worse (for fatigue calculation)
-        //    Positive vars: kualitas_tidur, kepuasan_hidup, regulasi_emosi
+        // === Fuzzy Rules ===
         $tidur_buruk        = 11 - $kualitas_tidur;     // High = poor sleep quality
         $ketidakpuasan      = 11 - $kepuasan_hidup;     // High = life dissatisfaction
         $disregulasi_emosi  = 11 - $regulasi_emosi;     // High = poor emotion regulation
-
-        // Negative variables used directly (high = bad = high fatigue)
-        // $kelelahan_mental, $gangguan_konsentrasi, $mood_rendah,
-        // $kecemasan, $kewalahan, $kehilangan_motivasi, $dampak_emosi, $beban_mental
-
-        // 2. Fuzzifikasi
-        // All psychological variables use consistent thresholds:
-        // Rendah: dominant at 1-3, falls to 0 at 5
-        // Sedang: rises from 3, peaks at 5.5, falls to 0 at 8
-        // Tinggi: rises from 6, fully high at 8+
 
         // --- Kelelahan Mental ---
         $km_rendah = $this->membershipTurun($kelelahan_mental, 3, 5);
@@ -266,60 +250,76 @@ class FuzzyController extends Controller
         // BAGIAN 4: SIMPAN KE DATABASE
         // ============================================================
 
-        $hasil = HasilAnalisis::create([
-            // Input kuisioner (daily activities)
-            'jam_tidur'   => $jam_tidur,
-            'screen_time' => $screen_time,
+        // Simpan ke 4 tabel dalam 1 transaction (atomicity)
+        $analisisId = DB::transaction(function () use (
+            $jam_tidur, $screen_time,
+            $kualitas_tidur, $kepuasan_hidup, $regulasi_emosi,
+            $kelelahan_mental, $gangguan_konsentrasi, $mood_rendah,
+            $kecemasan, $kewalahan, $dampak_screen_time,
+            $kehilangan_motivasi, $dampak_emosi, $beban_mental,
+            $overthinking, $sulit_rileks, $gejala_fisik_stres,
+            $nilai_fatigue, $status,
+            $ferData, $finalScore, $finalStatus
+        ) {
+            // 1. Parent (analisis) — output + meta
+            $analisis = Analisis::create([
+                'nilai_fatigue'        => $nilai_fatigue,
+                'status'               => $status,
+                'fer_stress_score'     => $ferData['fer_stress_score'],
+                'fer_status'           => $ferData['fer_status'],
+                'final_score'          => $finalScore,
+                'final_status'         => $finalStatus,
+                'fer_detected'         => $ferData['fer_detected'],
+                'total_frames_analyzed'=> $ferData['total_frames_analyzed'],
+            ]);
 
-            // === NEW: Clinical Psychological Assessment ===
-            // Positive variables
-            'kualitas_tidur'  => $kualitas_tidur,
-            'kepuasan_hidup'  => $kepuasan_hidup,
-            'regulasi_emosi'  => $regulasi_emosi,
+            // 2. Child 1/3 — aktivitas_harian
+            AktivitasHarian::create([
+                'id'          => $analisis->id,
+                'jam_tidur'   => $jam_tidur,
+                'screen_time' => $screen_time,
+            ]);
 
-            // Negative variables
-            'kelelahan_mental'      => $kelelahan_mental,
-            'gangguan_konsentrasi'  => $gangguan_konsentrasi,
-            'mood_rendah'           => $mood_rendah,
-            'kecemasan'             => $kecemasan,
-            'kewalahan'             => $kewalahan,
-            'dampak_screen_time'    => $dampak_screen_time,
-            'kehilangan_motivasi'   => $kehilangan_motivasi,
-            'dampak_emosi'          => $dampak_emosi,
-            'beban_mental'          => $beban_mental,
-            'overthinking'          => $overthinking,
-            'sulit_rileks'          => $sulit_rileks,
-            'gejala_fisik_stres'    => $gejala_fisik_stres,
+            // 3. Child 2/3 — psikologis_klinis
+            PsikologisKlinis::create([
+                'id'                   => $analisis->id,
+                'kualitas_tidur'       => $kualitas_tidur,
+                'kepuasan_hidup'       => $kepuasan_hidup,
+                'regulasi_emosi'       => $regulasi_emosi,
+                'kelelahan_mental'     => $kelelahan_mental,
+                'gangguan_konsentrasi' => $gangguan_konsentrasi,
+                'mood_rendah'          => $mood_rendah,
+                'kecemasan'            => $kecemasan,
+                'kewalahan'            => $kewalahan,
+                'dampak_screen_time'   => $dampak_screen_time,
+                'kehilangan_motivasi'  => $kehilangan_motivasi,
+                'dampak_emosi'         => $dampak_emosi,
+                'beban_mental'         => $beban_mental,
+                'overthinking'         => $overthinking,
+                'sulit_rileks'         => $sulit_rileks,
+                'gejala_fisik_stres'   => $gejala_fisik_stres,
+            ]);
 
-            // Hasil Fuzzy (primary)
-            'nilai_fatigue' => $nilai_fatigue,
-            'status'        => $status,
+            // 4. Child 3/3 — fer_scanner
+            FerScanner::create([
+                'id'                       => $analisis->id,
+                'dominant_emotion'         => $ferData['dominant_emotion'],
+                'dominant_emotion_score'   => $ferData['dominant_emotion_score'],
+                'emotion_neutral'          => $ferData['emotions']['neutral'],
+                'emotion_happy'            => $ferData['emotions']['happy'],
+                'emotion_sad'              => $ferData['emotions']['sad'],
+                'emotion_angry'            => $ferData['emotions']['angry'],
+                'emotion_fearful'          => $ferData['emotions']['fearful'],
+                'emotion_disgusted'        => $ferData['emotions']['disgusted'],
+                'emotion_surprised'        => $ferData['emotions']['surprised'],
+                'emotion_variance'         => $ferData['emotion_variance'],
+                'negative_emotion_duration'=> $ferData['negative_emotion_duration'],
+            ]);
 
-            // Hasil FER (supporting)
-            'fer_stress_score' => $ferData['fer_stress_score'],
-            'fer_status'       => $ferData['fer_status'],
+            return $analisis->id;
+        });
 
-            // Final combined
-            'final_score'  => $finalScore,
-            'final_status' => $finalStatus,
-
-            // Detail FER
-            'dominant_emotion'          => $ferData['dominant_emotion'],
-            'dominant_emotion_score'    => $ferData['dominant_emotion_score'],
-            'emotion_neutral'           => $ferData['emotions']['neutral'],
-            'emotion_happy'             => $ferData['emotions']['happy'],
-            'emotion_sad'               => $ferData['emotions']['sad'],
-            'emotion_angry'             => $ferData['emotions']['angry'],
-            'emotion_fearful'           => $ferData['emotions']['fearful'],
-            'emotion_disgusted'         => $ferData['emotions']['disgusted'],
-            'emotion_surprised'         => $ferData['emotions']['surprised'],
-            'emotion_variance'          => $ferData['emotion_variance'],
-            'negative_emotion_duration' => $ferData['negative_emotion_duration'],
-            'total_frames_analyzed'     => $ferData['total_frames_analyzed'],
-            'fer_detected'              => $ferData['fer_detected'],
-        ]);
-
-        session(['hasil_id' => $hasil->id]);
+        session(['hasil_id' => $analisisId]);
         session()->forget('fer_result'); // Bersihkan FER session
 
         return redirect()->route('result');
