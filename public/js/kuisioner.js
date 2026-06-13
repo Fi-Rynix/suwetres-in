@@ -66,11 +66,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Step titles mapping
         const stepTitles = {
-            1: "Bagian 1 dari 5: AKTIVITAS HARIAN",
-            2: "Bagian 2 dari 5: MOOD & KESEJAHTERAAN EMOSIONAL",
-            3: "Bagian 3 dari 5: KECEMASAN & TINGKAT STRES",
-            4: "Bagian 4 dari 5: BURNOUT & KELELAHAN MENTAL",
-            5: "Bagian 5 dari 5: DAMPAK AKTIVITAS DIGITAL"
+            1: "Bagian 1 dari 5: DAILY ACTIVITIES",
+            2: "Bagian 2 dari 5: MOOD & EMOTIONAL WELL-BEING",
+            3: "Bagian 3 dari 5: ANXIETY & STRESS LEVEL",
+            4: "Bagian 4 dari 5: BURNOUT & MENTAL FATIGUE",
+            5: "Bagian 5 dari 5: DIGITAL IMPACT"
         };
 
         const activeTitleEl = document.getElementById('active-step-title');

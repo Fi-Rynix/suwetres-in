@@ -14,7 +14,7 @@
     $psikologisQuestions = [
         [
             'field' => 'kualitas_tidur',
-            'num' => 'Psikologis 01',
+            'num' => 'Mood 1',
             'q' => 'Dalam 7 hari terakhir, seberapa puas Anda dengan kualitas tidur Anda?',
             'anchor_low' => '1 = Sangat Tidak Puas',
             'anchor_high' => '10 = Sangat Puas',
@@ -23,7 +23,7 @@
         ],
         [
             'field' => 'kelelahan_mental',
-            'num' => 'Psikologis 02',
+            'num' => 'Burnout 1',
             'q' => 'Dalam 7 hari terakhir, seberapa sering Anda merasa mudah lelah secara mental?',
             'anchor_low' => '1 = Tidak Sama Sekali',
             'anchor_high' => '10 = Hampir Sepanjang Waktu',
@@ -32,7 +32,7 @@
         ],
         [
             'field' => 'gangguan_konsentrasi',
-            'num' => 'Psikologis 03',
+            'num' => 'Burnout 2',
             'q' => 'Dalam 7 hari terakhir, seberapa terganggu konsentrasi Anda saat belajar atau mengerjakan tugas?',
             'anchor_low' => '1 = Tidak Terganggu',
             'anchor_high' => '10 = Sangat Terganggu',
@@ -41,7 +41,7 @@
         ],
         [
             'field' => 'mood_rendah',
-            'num' => 'Psikologis 04',
+            'num' => 'Mood 2',
             'q' => 'Seberapa sering Anda merasa sedih atau putus asa?',
             'anchor_low' => '1 = Tidak Sama Sekali',
             'anchor_high' => '10 = Hampir Sepanjang Waktu',
@@ -50,7 +50,7 @@
         ],
         [
             'field' => 'kecemasan',
-            'num' => 'Psikologis 05',
+            'num' => 'Stres 1',
             'q' => 'Dalam 7 hari terakhir, seberapa sering Anda merasa cemas, gelisah, atau sulit merasa tenang?',
             'anchor_low' => '1 = Tidak Sama Sekali',
             'anchor_high' => '10 = Sangat Sering',
@@ -59,7 +59,7 @@
         ],
         [
             'field' => 'kewalahan',
-            'num' => 'Psikologis 06',
+            'num' => 'Stres 2',
             'q' => 'Dalam 7 hari terakhir, seberapa besar Anda merasa kewalahan oleh tuntutan kuliah dan aktivitas sehari-hari?',
             'anchor_low' => '1 = Tidak Kewalahan',
             'anchor_high' => '10 = Sangat Kewalahan',
@@ -68,7 +68,7 @@
         ],
         [
             'field' => 'dampak_screen_time',
-            'num' => 'Psikologis 07',
+            'num' => 'Digital 1',
             'q' => 'Dalam 7 hari terakhir, seberapa besar screen time memengaruhi kondisi mental atau emosional Anda?',
             'anchor_low' => '1 = Tidak Berpengaruh',
             'anchor_high' => '10 = Sangat Berpengaruh',
@@ -77,7 +77,7 @@
         ],
         [
             'field' => 'kehilangan_motivasi',
-            'num' => 'Psikologis 08',
+            'num' => 'Burnout 3',
             'q' => 'Dalam 7 hari terakhir, seberapa sering Anda merasa kehilangan motivasi untuk menjalani aktivitas kuliah?',
             'anchor_low' => '1 = Tidak Pernah',
             'anchor_high' => '10 = Hampir Sepanjang Waktu',
@@ -86,7 +86,7 @@
         ],
         [
             'field' => 'dampak_emosi',
-            'num' => 'Psikologis 09',
+            'num' => 'Digital 2',
             'q' => 'Dalam 7 hari terakhir, seberapa besar kondisi emosional Anda memengaruhi produktivitas belajar atau bekerja?',
             'anchor_low' => '1 = Tidak Memengaruhi',
             'anchor_high' => '10 = Sangat Memengaruhi',
@@ -95,7 +95,7 @@
         ],
         [
             'field' => 'beban_mental',
-            'num' => 'Psikologis 10',
+            'num' => 'Burnout 4',
             'q' => 'Dalam 7 hari terakhir, seberapa besar beban mental yang Anda rasakan?',
             'anchor_low' => '1 = Sangat Ringan',
             'anchor_high' => '10 = Sangat Berat',
@@ -104,7 +104,7 @@
         ],
         [
             'field' => 'kepuasan_hidup',
-            'num' => 'Psikologis 11',
+            'num' => 'Mood 3',
             'q' => 'Dalam 7 hari terakhir, seberapa puas Anda dengan kehidupan sehari-hari Anda secara keseluruhan?',
             'anchor_low' => '1 = Sangat Tidak Puas',
             'anchor_high' => '10 = Sangat Puas',
@@ -113,7 +113,7 @@
         ],
         [
             'field' => 'regulasi_emosi',
-            'num' => 'Psikologis 12',
+            'num' => 'Mood 4',
             'q' => 'Dalam 7 hari terakhir, seberapa mudah Anda menenangkan diri ketika mengalami emosi yang kuat?',
             'anchor_low' => '1 = Sangat Sulit',
             'anchor_high' => '10 = Sangat Mudah',
@@ -122,7 +122,7 @@
         ],
         [
             'field' => 'overthinking',
-            'num' => 'Psikologis 13',
+            'num' => 'Burnout 5',
             'q' => 'Dalam 7 hari terakhir, seberapa sering pikiran Anda terus berputar memikirkan banyak hal sekaligus?',
             'anchor_low' => '1 = Tidak Sama Sekali',
             'anchor_high' => '10 = Hampir Sepanjang Waktu',
@@ -131,7 +131,7 @@
         ],
         [
             'field' => 'sulit_rileks',
-            'num' => 'Psikologis 14',
+            'num' => 'Stres 3',
             'q' => 'Dalam 7 hari terakhir, seberapa sering Anda merasa sulit untuk rileks atau menenangkan diri?',
             'anchor_low' => '1 = Tidak Sama Sekali',
             'anchor_high' => '10 = Hampir Sepanjang Waktu',
@@ -140,7 +140,7 @@
         ],
         [
             'field' => 'gejala_fisik_stres',
-            'num' => 'Psikologis 15',
+            'num' => 'Stres 4',
             'q' => 'Seberapa sering Anda mengalami gejala fisik saat tertekan (misalnya jantung berdebar, napas terasa pendek, atau tubuh terasa tegang)?',
             'anchor_low' => '1 = Tidak Sama Sekali',
             'anchor_high' => '10 = Sangat Sering',
@@ -170,7 +170,7 @@
                 <div class="step-progress-icon"><i data-lucide="moon"></i></div>
                 <div class="step-progress-text">
                     <span class="step-lbl">STEP 1</span>
-                    <span class="step-title">Harian</span>
+                    <span class="step-title">Daily</span>
                 </div>
             </div>
             <div class="step-progress-item" data-progress-step="2">
@@ -205,7 +205,7 @@
 
         <!-- Active Step Title -->
         <div class="active-step-label-container">
-            <h3 id="active-step-title" style="margin: 0; font-size: 1.15rem;">Bagian 1 dari 5: AKTIVITAS HARIAN</h3>
+            <h3 id="active-step-title" style="margin: 0; font-size: 1.15rem;">Bagian 1 dari 5: DAILY ACTIVITIES</h3>
         </div>
 
         <!-- Progress bar outer and inner -->
@@ -282,21 +282,21 @@
         </div>
 
         <!-- ========================================== -->
-        <!-- STEP 1: AKTIVITAS HARIAN -->
+        <!-- STEP 1: DAILY ACTIVITIES -->
         <!-- ========================================== -->
         <div class="wizard-step" data-step="1">
             <div class="step-intro-card" style="background-color: #FFFDE5; border: 2px solid var(--dark); border-left: 8px solid var(--yellow); padding: 1.2rem; margin-bottom: 2rem; box-shadow: 4px 4px 0 var(--dark);">
                 <h3 style="font-size: 1.15rem; margin: 0 0 0.5rem 0; font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 0.5rem;">
-                    <i data-lucide="moon" style="width: 20px; height: 20px;"></i> AKTIVITAS HARIAN
+                    <i data-lucide="moon" style="width: 20px; height: 20px;"></i> DAILY ACTIVITIES
                 </h3>
                 <p style="font-size: 0.9rem; margin: 0; line-height: 1.4; font-weight: 600; color: #444;">
-                    Data aktivitas harian digunakan untuk mengukur faktor fisik yang berkontribusi terhadap kelelahan dan burnout.
+                    Data daily activities digunakan untuk mengukur faktor fisik yang berkontribusi terhadap kelelahan dan burnout.
                 </p>
             </div>
 
             <!-- JAM TIDUR -->
             <div class="question-card activity-card">
-                <div class="question-num" style="background-color: var(--yellow); color: var(--dark);">Harian 01</div>
+                <div class="question-num" style="background-color: var(--yellow); color: var(--dark);">Daily 1</div>
                 <label class="form-label" for="jam_tidur" style="font-size: 1.2rem; margin-bottom: 0.8rem;">
                     Berapa rata-rata jam tidur Anda per hari? (0 - 24 Jam)
                 </label>
@@ -311,7 +311,7 @@
 
             <!-- SCREEN TIME -->
             <div class="question-card activity-card">
-                <div class="question-num" style="background-color: var(--yellow); color: var(--dark);">Harian 02</div>
+                <div class="question-num" style="background-color: var(--yellow); color: var(--dark);">Daily 2</div>
                 <label class="form-label" for="screen_time" style="font-size: 1.2rem; margin-bottom: 0.8rem;">
                     Berapa rata-rata screen time Anda per hari? (0 - 24 Jam)
                 </label>
@@ -495,12 +495,12 @@
         </div>
 
         <!-- ========================================== -->
-        <!-- STEP 5: DAMPAK AKTIVITAS DIGITAL -->
+        <!-- STEP 5: DIGITAL IMPACT -->
         <!-- ========================================== -->
         <div class="wizard-step" data-step="5">
             <div class="step-intro-card" style="background-color: #FFFDE5; border: 2px solid var(--dark); border-left: 8px solid var(--secondary); padding: 1.2rem; margin-bottom: 2rem; box-shadow: 4px 4px 0 var(--dark);">
                 <h3 style="font-size: 1.15rem; margin: 0 0 0.5rem 0; font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 0.5rem;">
-                    <i data-lucide="monitor" style="width: 20px; height: 20px;"></i> DAMPAK AKTIVITAS DIGITAL
+                    <i data-lucide="monitor" style="width: 20px; height: 20px;"></i> DIGITAL IMPACT
                 </h3>
                 <p style="font-size: 0.9rem; margin: 0; line-height: 1.4; font-weight: 600; color: #444;">
                     Bagian ini mengukur bagaimana aktivitas digital dan kondisi emosional memengaruhi kehidupan sehari-hari.
@@ -568,11 +568,11 @@
                             </li>
                             <li style="font-weight: 700; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; color: #155724; font-size: 0.9rem;">
                                 <i data-lucide="check" style="width: 18px; height: 18px; background-color: var(--green); border: 2px solid var(--dark); border-radius: 50%; padding: 1px; color: var(--dark);"></i>
-                                Aktivitas Harian Terekam
+                                Daily Activities Recorded
                             </li>
                             <li style="font-weight: 700; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; color: #155724; font-size: 0.9rem;">
                                 <i data-lucide="check" style="width: 18px; height: 18px; background-color: var(--green); border: 2px solid var(--dark); border-radius: 50%; padding: 1px; color: var(--dark);"></i>
-                                Kondisi Psikologis Terekam
+                                Psychological Conditions Recorded
                             </li>
                             <li style="font-weight: 700; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; color: #155724; font-size: 0.9rem;">
                                 <i data-lucide="check" style="width: 18px; height: 18px; background-color: var(--green); border: 2px solid var(--dark); border-radius: 50%; padding: 1px; color: var(--dark);"></i>

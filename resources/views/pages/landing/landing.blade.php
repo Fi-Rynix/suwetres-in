@@ -24,8 +24,6 @@
 
     <p class="landing-description">
         Suwetres.in membantu mahasiswa mengenali tingkat kelelahan akademik, stres, dan risiko burnout melalui assessment berbasis aktivitas harian, kondisi psikologis, serta analisis ekspresi wajah berbasis AI.
-        <br><br>
-        Hasil analisis disajikan secara sederhana agar pengguna dapat lebih memahami kondisi diri dan menjaga keseimbangan antara aktivitas, istirahat, dan kesehatan mental.
     </p>
 
     <div class="landing-action-container">
