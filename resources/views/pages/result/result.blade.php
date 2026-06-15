@@ -261,7 +261,7 @@
             </h3>
             
             <p class="panel-desc">
-                Sub-skor kelelahan psikologis dihitung dari 12 parameter klinis yang diadaptasi dari PHQ-9, GAD-7, DASS-21, PSQI, DERS, dan WHO-5:
+                Sub-skor kelelahan psikologis dihitung dari 15 parameter klinis yang diadaptasi dari PHQ-9, GAD-7, DASS-21, PSQI, DERS, WHO-5, dan 3 item kustom (overthinking, sulit rileks, gejala fisik stres):
             </p>
 
             <div class="flex-col">
@@ -319,12 +319,12 @@
             </div>
         </div>
 
-        <!-- Right Column: AI Facial Emotion Recognition (Supporting 30%) -->
+        <!-- Right Column: AI Facial Emotion Recognition (Supporting 20%) -->
         <div class="neo-box result-panel">
             <div class="panel-title-spaced">
                 <h3 class="panel-title-inline">📷 AI FACIAL EXPRESSION SCAN</h3>
                 <span class="supporting-badge">
-                    SUPPORTING 30%
+                    SUPPORTING 20%
                 </span>
             </div>
 
@@ -396,10 +396,10 @@
                 MATRIKS FUZZY SUGENO
             </h4>
             <p class="system-info-text">
-                • Fuzzy Score: <b>{{ number_format($hasil->nilai_fatigue, 1) }}% × 70%</b>
+                • Fuzzy Score: <b>{{ number_format($hasil->nilai_fatigue, 1) }}% × 80%</b>
             </p>
             <p class="system-info-text">
-                • FER Score: <b>{{ number_format($hasil->fer_stress_score ?? 0, 1) }}% × 30%</b>
+                • FER Score: <b>{{ number_format($hasil->fer_stress_score ?? 0, 1) }}% × 20%</b>
             </p>
             <p class="system-info-highlight" style="color: var(--primary);">
                 • Combined Index: <b>{{ number_format($finalScore, 1) }}%</b>
