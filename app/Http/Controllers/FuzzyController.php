@@ -11,8 +11,8 @@ use App\Models\FerScanner;
 
 class FuzzyController extends Controller
 {
-    private const FUZZY_WEIGHT = 0.7;
-    private const FER_WEIGHT   = 0.3;
+    private const FUZZY_WEIGHT = 0.8;
+    private const FER_WEIGHT   = 0.2;
 
     public function processFuzzy() {
         $data = session('data_kuisioner');
@@ -224,7 +224,7 @@ class FuzzyController extends Controller
         $status = $this->classifyFatigue($nilai_fatigue);
 
         // ============================================================
-        // BAGIAN 2: FER STRESS SCORING (SUPPORTING - 30%)
+        // BAGIAN 2: FER STRESS SCORING (SUPPORTING - 20%)
         // ============================================================
 
         // Sudah diproses di awal $ferData
