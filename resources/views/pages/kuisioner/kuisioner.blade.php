@@ -302,7 +302,7 @@
                 </label>
                 <div class="activity-slider-wrapper">
                     <div style="text-align: center; margin-bottom: 1rem;">
-                        <span class="slider-value-display" id="jam_tidur_display">{{ old('jam_tidur') ?: 7 }}<span> Jam</span></span>
+                        <span class="slider-value-display" id="jam_tidur_display">{{ old('jam_tidur') ?: 0 }}<span> Jam</span></span>
                     </div>
                     <input
                         type="range"
@@ -312,7 +312,7 @@
                         name="jam_tidur"
                         id="jam_tidur"
                         class="activity-slider"
-                        value="{{ old('jam_tidur') ?: 7 }}"
+                        value="{{ old('jam_tidur') ?: 0 }}"
                         required
                         oninput="
                             this.style.setProperty('--fill-percent', (this.value / 24 * 100) + '%');
@@ -342,7 +342,7 @@
                 </label>
                 <div class="activity-slider-wrapper">
                     <div style="text-align: center; margin-bottom: 1rem;">
-                        <span class="slider-value-display" id="screen_time_display">{{ old('screen_time') ?: 4 }}<span> Jam</span></span>
+                        <span class="slider-value-display" id="screen_time_display">{{ old('screen_time') ?: 0 }}<span> Jam</span></span>
                     </div>
                     <input
                         type="range"
@@ -352,7 +352,7 @@
                         name="screen_time"
                         id="screen_time"
                         class="activity-slider"
-                        value="{{ old('screen_time') ?: 4 }}"
+                        value="{{ old('screen_time') ?: 0 }}"
                         required
                         oninput="
                             this.style.setProperty('--fill-percent', (this.value / 24 * 100) + '%');
