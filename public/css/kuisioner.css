@@ -1,6 +1,113 @@
 /* Questionnaire Specific Styles */
 
-/* Progress Indicator styling */
+/* Activity Slider (Daily 1 & 2) */
+.activity-slider-wrapper {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Current value display */
+.slider-value-display {
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: var(--dark);
+    line-height: 1;
+    margin-bottom: 1rem;
+    padding: 0.75rem 1.5rem;
+    background-color: var(--yellow);
+    border: 3px solid var(--dark);
+    box-shadow: 4px 4px 0 var(--dark);
+    display: inline-block;
+    min-width: 100px;
+}
+.slider-value-display span {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+/* Range input track & thumb — neo-brutalism */
+.activity-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 20px;
+    background: #EEE;
+    border: 3px solid var(--dark);
+    box-shadow: 3px 3px 0 var(--dark);
+    border-radius: 0;
+    outline: none;
+    cursor: pointer;
+}
+
+/* Webkit (Chrome, Safari, Edge) thumb */
+.activity-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 32px;
+    height: 32px;
+    background: var(--yellow);
+    border: 3px solid var(--dark);
+    box-shadow: 3px 3px 0 var(--dark);
+    border-radius: 0;
+    cursor: grab;
+    cursor: -webkit-grab;
+}
+.activity-slider::-webkit-slider-thumb:active {
+    cursor: grabbing;
+    transform: translate(1px, 1px);
+    box-shadow: 2px 2px 0 var(--dark);
+    background: var(--green);
+}
+
+/* Firefox thumb */
+.activity-slider::-moz-range-thumb {
+    width: 28px;
+    height: 28px;
+    background: var(--yellow);
+    border: 3px solid var(--dark);
+    box-shadow: 3px 3px 0 var(--dark);
+    border-radius: 0;
+    cursor: grab;
+}
+.activity-slider::-moz-range-thumb:active {
+    background: var(--green);
+    cursor: grabbing;
+}
+
+/* Track fill effect (webkit only) */
+.activity-slider::-webkit-slider-runnable-track {
+    height: 20px;
+    background: linear-gradient(
+        to right,
+        var(--green) 0%,
+        var(--yellow) var(--fill-percent, 0%),
+        #EEE var(--fill-percent, 0%),
+        #EEE 100%
+    );
+}
+
+/* Slider scale markers */
+.slider-scale {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.4rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #555;
+}
+.slider-scale span {
+    text-align: center;
+}
+
+/* Hidden native number input (accessibility fallback) */
+.activity-slider-input-native {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
 .progress-container {
     background-color: var(--white);
     border: var(--border-width) solid var(--dark);

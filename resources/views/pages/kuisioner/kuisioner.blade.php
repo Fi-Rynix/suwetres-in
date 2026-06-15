@@ -300,12 +300,37 @@
                 <label class="form-label" for="jam_tidur" style="font-size: 1.2rem; margin-bottom: 0.8rem;">
                     Berapa rata-rata jam tidur Anda per hari? (0 - 24 Jam)
                 </label>
-                <input type="number" step="any" min="0" max="24" name="jam_tidur" id="jam_tidur" class="neo-input" 
-                       placeholder="Masukkan rata-rata jam tidur (contoh: 6)" value="{{ old('jam_tidur') }}" required>
-                <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 0.75rem; font-weight: 700; color: #555;">
-                    <span>Sedikit (0-5 Jam)</span>
-                    <span>Cukup (4-8 Jam)</span>
-                    <span>Banyak (7+ Jam)</span>
+                <div class="activity-slider-wrapper">
+                    <div style="text-align: center; margin-bottom: 1rem;">
+                        <span class="slider-value-display" id="jam_tidur_display">{{ old('jam_tidur') ?: 7 }}<span> Jam</span></span>
+                    </div>
+                    <input
+                        type="range"
+                        min="0"
+                        max="24"
+                        step="1"
+                        name="jam_tidur"
+                        id="jam_tidur"
+                        class="activity-slider"
+                        value="{{ old('jam_tidur') ?: 7 }}"
+                        required
+                        oninput="
+                            this.style.setProperty('--fill-percent', (this.value / 24 * 100) + '%');
+                            document.getElementById('jam_tidur_display').innerHTML = this.value + '<span> Jam</span>';
+                        "
+                        onload="
+                            this.style.setProperty('--fill-percent', (this.value / 24 * 100) + '%');
+                        "
+                    >
+                    <div class="slider-scale">
+                        <span>0</span>
+                        <span>4</span>
+                        <span>8</span>
+                        <span>12</span>
+                        <span>16</span>
+                        <span>20</span>
+                        <span>24</span>
+                    </div>
                 </div>
             </div>
 
@@ -315,12 +340,37 @@
                 <label class="form-label" for="screen_time" style="font-size: 1.2rem; margin-bottom: 0.8rem;">
                     Berapa rata-rata screen time Anda per hari? (0 - 24 Jam)
                 </label>
-                <input type="number" step="any" min="0" max="24" name="screen_time" id="screen_time" class="neo-input" 
-                       placeholder="Masukkan durasi screen time (contoh: 8)" value="{{ old('screen_time') }}" required>
-                <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 0.75rem; font-weight: 700; color: #555;">
-                    <span>Rendah (0-5 Jam)</span>
-                    <span>Sedang (4-9 Jam)</span>
-                    <span>Tinggi (8+ Jam)</span>
+                <div class="activity-slider-wrapper">
+                    <div style="text-align: center; margin-bottom: 1rem;">
+                        <span class="slider-value-display" id="screen_time_display">{{ old('screen_time') ?: 4 }}<span> Jam</span></span>
+                    </div>
+                    <input
+                        type="range"
+                        min="0"
+                        max="24"
+                        step="1"
+                        name="screen_time"
+                        id="screen_time"
+                        class="activity-slider"
+                        value="{{ old('screen_time') ?: 4 }}"
+                        required
+                        oninput="
+                            this.style.setProperty('--fill-percent', (this.value / 24 * 100) + '%');
+                            document.getElementById('screen_time_display').innerHTML = this.value + '<span> Jam</span>';
+                        "
+                        onload="
+                            this.style.setProperty('--fill-percent', (this.value / 24 * 100) + '%');
+                        "
+                    >
+                    <div class="slider-scale">
+                        <span>0</span>
+                        <span>4</span>
+                        <span>8</span>
+                        <span>12</span>
+                        <span>16</span>
+                        <span>20</span>
+                        <span>24</span>
+                    </div>
                 </div>
             </div>
 

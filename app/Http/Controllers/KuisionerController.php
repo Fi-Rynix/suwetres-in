@@ -12,9 +12,9 @@ class KuisionerController extends Controller
 
     public function postKuisioner(Request $request) {
         $validated = $request->validate([
-            // === Aktivitas Harian ===
-            'jam_tidur' => 'required|numeric|min:0|max:24',
-            'screen_time' => 'required|numeric|min:0|max:24',
+            // === Aktivitas Harian (slider 0-24, integer) ===
+            'jam_tidur' => 'required|integer|min:0|max:24',
+            'screen_time' => 'required|integer|min:0|max:24',
             
             // === 12 Clinical Psychological Questions (Likert 1-10) ===
             // Positive variables (high = good)
