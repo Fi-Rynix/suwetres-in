@@ -1,38 +1,20 @@
-/**
- * Suwetres.in - FER Scanner
- * Menggunakan Face-API.js untuk:
- *   1. Real-time face detection (Tiny Face Detector)
- *   2. Facial expression recognition (7 emotions)
- *   3. Temporal analysis selama 5 detik
- *   4. Hitung emotion variance (instabilitas) & negative duration
- *
- * Output dikirim ke Laravel via AJAX (POST /scan/submit-fer)
- * Lalu redirect ke loading -> process -> result.
- */
-
 (() => {
     "use strict";
 
     const config = window.scanConfig || {};
     const SCAN_DURATION = config.scanDuration || 5000;
-    const DETECTION_INTERVAL = 150; // ms (~6-7 fps detection)
+    const DETECTION_INTERVAL = 150;
     const NEGATIVE_EMOTIONS = ["sad", "angry", "fearful", "disgusted"];
 
-    // DOM refs
     let video, overlay, captureBtn, camStatus, scanningOverlay,
         faceFrame, liveEmotion, dominantEmotionText, emotionBars,
         scanProgress;
 
-    // State
     let modelsLoaded = false;
     let cameraReady = false;
     let detectionLoopId = null;
     let scanning = false;
-    let frameHistory = []; // Array of emotion objects per frame
-
-    // ==============================================================
-    // INIT
-    // ==============================================================
+    let frameHistory = [];
 
     document.addEventListener("DOMContentLoaded", async () => {
         cacheDom();
@@ -60,15 +42,10 @@
         captureBtn.addEventListener("click", startScan);
     }
 
-    // ==============================================================
-    // MODEL LOADING
-    // ==============================================================
-
     async function loadModels() {
         try {
             setStatus("LOADING AI MODEL...", "var(--purple)", "var(--white)");
 
-            // Tunggu face-api siap (defer script)
             await waitForFaceApi();
 
             const url = config.modelsUrl;
@@ -79,205 +56,137 @@
             ]);
 
             modelsLoaded = true;
-            setStatus("AI MODEL READY", "var(--green)", "var(--dark)");
+            setStatus("MODEL SIAP", "var(--green)", "var(--dark)");
         } catch (err) {
             console.error("Gagal load model:", err);
-            setStatus("GAGAL LOAD AI MODEL", "var(--primary)", "var(--white)");
-            // Tetap aktifkan tombol untuk fallback simulasi
+            setStatus("MODEL GAGAL - FALLBACK", "var(--primary)", "var(--white)");
             enableFallbackSimulation();
         }
     }
 
-    function waitForFaceApi(timeout = 8000) {
+    function waitForFaceApi(retries = 50) {
         return new Promise((resolve, reject) => {
-            const start = Date.now();
-            const check = () => {
+            const check = (i) => {
                 if (typeof faceapi !== "undefined") return resolve();
-                if (Date.now() - start > timeout) {
-                    return reject(new Error("face-api.js tidak ter-load"));
-                }
-                setTimeout(check, 100);
+                if (i <= 0) return reject(new Error("face-api timeout"));
+                setTimeout(() => check(i - 1), 100);
             };
-            check();
+            check(retries);
         });
     }
 
-    // ==============================================================
-    // CAMERA
-    // ==============================================================
-
     async function startCamera() {
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            setStatus("WEBCAM TIDAK DIDUKUNG", "var(--primary)", "var(--white)");
-            enableFallbackSimulation();
-            return;
-        }
-
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: { width: 640, height: 480, facingMode: "user" },
+                audio: false,
             });
             video.srcObject = stream;
-
-            await new Promise((resolve) => {
-                video.onloadedmetadata = () => {
-                    video.play();
-                    resolve();
-                };
-            });
-
-            // Set canvas size sesuai video
-            overlay.width = video.videoWidth;
-            overlay.height = video.videoHeight;
-
             cameraReady = true;
-            if (modelsLoaded) {
-                setStatus("KAMERA & AI SIAP - ARAHKAN WAJAH", "var(--green)", "var(--dark)");
-                captureBtn.style.display = "inline-block";
-                captureBtn.disabled = false;
-            }
+
+            video.addEventListener("loadedmetadata", () => {
+                overlay.width = video.videoWidth;
+                overlay.height = video.videoHeight;
+            });
         } catch (err) {
-            console.error("Akses kamera gagal:", err);
-            setStatus("KAMERA DITOLAK / TIDAK ADA", "var(--primary)", "var(--white)");
+            console.error("Gagal akses kamera:", err);
+            setStatus("KAMERA OFFLINE - FALLBACK", "var(--primary)", "var(--white)");
             enableFallbackSimulation();
         }
     }
-
-    function stopCamera() {
-        if (video && video.srcObject) {
-            video.srcObject.getTracks().forEach((t) => t.stop());
-        }
-    }
-
-    // ==============================================================
-    // LIVE DETECTION (Pre-scan)
-    // ==============================================================
 
     function startLiveDetection() {
         if (!modelsLoaded || !cameraReady) return;
 
-        liveEmotion.style.display = "block";
+        detectFrame();
+    }
 
-        const tick = async () => {
-            if (!modelsLoaded || !cameraReady) return;
+    async function detectFrame() {
+        if (!video || video.paused || video.ended) return;
 
-            try {
-                const result = await detectExpressions();
+        try {
+            const result = await faceapi
+                .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 }))
+                .withFaceLandmarks()
+                .withFaceExpressions();
 
-                if (result) {
-                    drawDetection(result);
-                    updateLiveEmotion(result.expressions);
-                    faceFrame.style.borderColor = "var(--green)";
+            const ctx = overlay.getContext("2d");
+            ctx.clearRect(0, 0, overlay.width, overlay.height);
 
-                    // Capture ke history saat scanning aktif
-                    if (scanning) {
-                        frameHistory.push(result.expressions);
-                    }
-                } else {
-                    clearOverlay();
-                    faceFrame.style.borderColor = "var(--yellow)";
-                    if (!scanning) {
-                        dominantEmotionText.textContent = "WAJAH TIDAK TERDETEKSI";
-                    }
+            if (result) {
+                const dims = faceapi.matchDimensions(overlay, result, true);
+                faceapi.draw.drawDetections(overlay, faceapi.resizeResults(result, dims));
+                faceapi.draw.drawFaceLandmarks(overlay, faceapi.resizeResults(result, dims));
+                updateLiveEmotion(result.expressions);
+
+                if (!scanning) {
+                    captureBtn.style.display = "inline-block";
+                    captureBtn.disabled = false;
+                    if (faceFrame) faceFrame.style.display = "none";
+                    setStatus("WAJAH TERDETEKSI", "var(--green)", "var(--dark)");
                 }
-            } catch (err) {
-                console.warn("Detection error:", err);
+
+                if (scanning) frameHistory.push(result.expressions);
+            } else {
+                if (!scanning) {
+                    captureBtn.style.display = "none";
+                    captureBtn.disabled = true;
+                    if (faceFrame) faceFrame.style.display = "flex";
+                    setStatus("CARI WAJAH...", "var(--secondary)", "var(--dark)");
+                }
             }
+        } catch (err) {
+            console.warn("Detect error:", err);
+        }
 
-            detectionLoopId = setTimeout(tick, DETECTION_INTERVAL);
-        };
-
-        tick();
-    }
-
-    async function detectExpressions() {
-        const detection = await faceapi
-            .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({
-                inputSize: 320,
-                scoreThreshold: 0.5,
-            }))
-            .withFaceLandmarks()
-            .withFaceExpressions();
-
-        return detection || null;
-    }
-
-    function drawDetection(result) {
-        const ctx = overlay.getContext("2d");
-        ctx.clearRect(0, 0, overlay.width, overlay.height);
-
-        const box = result.detection.box;
-        ctx.strokeStyle = "#00FF66";
-        ctx.lineWidth = 4;
-        ctx.strokeRect(box.x, box.y, box.width, box.height);
-    }
-
-    function clearOverlay() {
-        const ctx = overlay.getContext("2d");
-        ctx.clearRect(0, 0, overlay.width, overlay.height);
+        if (!scanning) {
+            requestAnimationFrame(() => setTimeout(detectFrame, DETECTION_INTERVAL));
+        }
     }
 
     function updateLiveEmotion(expressions) {
         const sorted = Object.entries(expressions).sort((a, b) => b[1] - a[1]);
-        const [topEmotion, topScore] = sorted[0];
+        const [domKey, domVal] = sorted[0];
 
-        const emoji = emotionEmoji(topEmotion);
-        dominantEmotionText.textContent = `${emoji} ${topEmotion.toUpperCase()} (${(topScore * 100).toFixed(1)}%)`;
+        if (dominantEmotionText) {
+            dominantEmotionText.textContent = `${domKey.toUpperCase()} (${(domVal * 100).toFixed(1)}%)`;
+        }
 
-        // Render bars
-        emotionBars.innerHTML = "";
-        sorted.forEach(([name, score]) => {
-            const pct = (score * 100).toFixed(1);
-            const isNeg = NEGATIVE_EMOTIONS.includes(name);
-            const color = name === "happy"
-                ? "var(--green)"
-                : isNeg ? "var(--primary)" : "var(--secondary)";
-
-            const row = document.createElement("div");
-            row.style.cssText = "display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; font-weight: 600;";
-            row.innerHTML = `
-                <span style="width: 80px; text-transform: uppercase;">${name}</span>
-                <div style="flex: 1; height: 12px; background: #EEE; border: 1.5px solid var(--dark); position: relative;">
-                    <div style="width: ${pct}%; height: 100%; background: ${color}; transition: width 0.2s;"></div>
-                </div>
-                <span style="width: 50px; text-align: right;">${pct}%</span>
-            `;
-            emotionBars.appendChild(row);
-        });
+        if (emotionBars) {
+            emotionBars.innerHTML = "";
+            const emotionKeys = ["neutral", "happy", "sad", "angry", "fearful", "disgusted", "surprised"];
+            const colors = {
+                neutral: "#AAAAAA", happy: "var(--green)", sad: "#3366FF",
+                angry: "var(--primary)", fearful: "var(--purple)",
+                disgusted: "#FF8800", surprised: "var(--secondary)",
+            };
+            emotionKeys.forEach((key) => {
+                const val = (expressions[key] || 0) * 100;
+                const row = document.createElement("div");
+                row.style.cssText = "display:flex;align-items:center;gap:0.5rem;margin-bottom:0.3rem;font-size:0.75rem;font-weight:700;text-transform:uppercase;";
+                row.innerHTML = `
+                    <span style="width:70px;">${key}</span>
+                    <div style="flex:1;height:10px;background:#eee;border:2px solid var(--dark);">
+                        <div style="width:${val}%;height:100%;background:${colors[key]};"></div>
+                    </div>
+                    <span style="width:40px;text-align:right;">${val.toFixed(0)}%</span>
+                `;
+                emotionBars.appendChild(row);
+            });
+        }
     }
-
-    function emotionEmoji(emotion) {
-        const map = {
-            neutral: "😐",
-            happy: "😊",
-            sad: "😢",
-            angry: "😠",
-            fearful: "😨",
-            disgusted: "🤢",
-            surprised: "😲",
-        };
-        return map[emotion] || "❓";
-    }
-
-    // ==============================================================
-    // SCANNING (5 second capture)
-    // ==============================================================
 
     function startScan() {
-        if (scanning) return;
+        if (!modelsLoaded || !cameraReady) return;
 
         scanning = true;
         frameHistory = [];
-
-        captureBtn.textContent = "SCANNING...";
-        captureBtn.style.backgroundColor = "var(--yellow)";
-        captureBtn.style.color = "var(--dark)";
         captureBtn.disabled = true;
+        captureBtn.textContent = "MEMINDAI... JANGAN BERGERAK!";
+        if (scanningOverlay) scanningOverlay.style.display = "block";
+        if (liveEmotion) liveEmotion.classList.add("scanning-active");
+        setStatus("SCANNING 5 DETIK...", "var(--primary)", "var(--white)");
 
-        scanningOverlay.style.display = "block";
-        setStatus("MENGANALISIS EKSPRESI WAJAH...", "var(--purple)", "var(--white)");
-
-        // Animate progress bar
         const startTime = Date.now();
         const progressInterval = setInterval(() => {
             const elapsed = Date.now() - startTime;
@@ -306,23 +215,12 @@
         } catch (err) {
             console.error("Submit FER gagal:", err);
             setStatus("GAGAL KIRIM DATA", "var(--primary)", "var(--white)");
-            // Fallback: tetap lanjut ke loading dengan FER kosong
             stopCamera();
             window.location.href = config.loadingUrl;
         }
     }
 
-    // ==============================================================
-    // ANALYSIS
-    // ==============================================================
-
-    /**
-     * Analisis frame history menjadi data agregat:
-     *   - Rata-rata 7 emosi
-     *   - Dominant emotion
-     *   - Variance emosi (stabilitas)
-     *   - Durasi emosi negatif (detik)
-     */
+    // Analisis frame history → rata-rata 7 emosi + variance + durasi negatif.
     function analyzeFrameHistory(frames) {
         if (!frames || frames.length === 0) {
             return { detected: false };
@@ -330,20 +228,16 @@
 
         const emotionKeys = ["neutral", "happy", "sad", "angry", "fearful", "disgusted", "surprised"];
 
-        // 1. Rata-rata tiap emosi
         const avg = {};
         emotionKeys.forEach((key) => {
             const sum = frames.reduce((acc, f) => acc + (f[key] || 0), 0);
             avg[key] = sum / frames.length;
         });
 
-        // 2. Dominant emotion (rata-rata tertinggi)
         const sortedAvg = Object.entries(avg).sort((a, b) => b[1] - a[1]);
         const dominantEmotion = sortedAvg[0][0];
         const dominantScore = sortedAvg[0][1];
 
-        // 3. Emotion variance (rata-rata variance dari semua emosi)
-        // Mengukur "betapa fluktuatif" emosi tiap frame
         let totalVariance = 0;
         emotionKeys.forEach((key) => {
             const mean = avg[key];
@@ -355,8 +249,6 @@
         });
         const emotionVariance = totalVariance / emotionKeys.length;
 
-        // 4. Negative emotion duration (detik)
-        // Hitung berapa frame yang dominant-nya negatif, lalu dikonversi ke detik
         const negativeFrames = frames.filter((f) => {
             const dominant = Object.entries(f).sort((a, b) => b[1] - a[1])[0][0];
             return NEGATIVE_EMOTIONS.includes(dominant);
@@ -370,15 +262,11 @@
             emotions: avg,
             dominant_emotion: dominantEmotion,
             dominant_emotion_score: dominantScore,
-            emotion_variance: Math.min(emotionVariance * 5, 1), // Skala ke 0-1
+            emotion_variance: Math.min(emotionVariance * 5, 1),
             negative_emotion_duration: parseFloat(negativeEmotionDuration.toFixed(2)),
             total_frames_analyzed: frames.length,
         };
     }
-
-    // ==============================================================
-    // SUBMIT TO LARAVEL
-    // ==============================================================
 
     async function submitFER(data) {
         const response = await fetch(config.submitFerUrl, {
@@ -399,10 +287,6 @@
         return await response.json();
     }
 
-    // ==============================================================
-    // FALLBACK (kalau kamera/model gagal)
-    // ==============================================================
-
     function enableFallbackSimulation() {
         captureBtn.style.display = "inline-block";
         captureBtn.disabled = false;
@@ -419,14 +303,16 @@
         };
     }
 
-    // ==============================================================
-    // UTILITIES
-    // ==============================================================
-
     function setStatus(text, bg, color) {
         if (!camStatus) return;
         camStatus.textContent = text;
         camStatus.style.backgroundColor = bg;
         camStatus.style.color = color;
+    }
+
+    function stopCamera() {
+        if (video && video.srcObject) {
+            video.srcObject.getTracks().forEach((t) => t.stop());
+        }
     }
 })();

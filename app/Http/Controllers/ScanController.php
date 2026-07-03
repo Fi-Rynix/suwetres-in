@@ -11,11 +11,7 @@ class ScanController extends Controller
         return view('pages.scan.scan');
     }
 
-    /**
-     * Endpoint AJAX untuk menerima hasil FER (Facial Expression Recognition)
-     * dari client-side Face-API.js, lalu disimpan di session sebelum
-     * digabungkan dengan hasil Fuzzy Sugeno di FuzzyController.
-     */
+    // Terima hasil FER dari Face-API.js (client-side) lalu simpan ke session.
     public function submitFER(Request $request) {
         $validated = $request->validate([
             'detected'                  => 'required|boolean',
@@ -34,7 +30,6 @@ class ScanController extends Controller
             'total_frames_analyzed'     => 'nullable|integer|min:0',
         ]);
 
-        // Simpan hasil FER ke session, akan dipakai di FuzzyController
         session(['fer_result' => $validated]);
 
         return response()->json([

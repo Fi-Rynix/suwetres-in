@@ -13,25 +13,21 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     let currentStep = 0;
-    
+
     function runProgress() {
         if (currentStep < statuses.length) {
             const step = statuses[currentStep];
             progress.style.width = step.pct + "%";
             title.innerText = step.title;
             status.innerText = step.msg;
-            
-            let delay = 600; 
-            if (currentStep === 2) delay = 900; 
-            
+
+            const delay = currentStep === 2 ? 900 : 600;
             currentStep++;
             setTimeout(runProgress, delay);
         } else {
-            // Selesai, redirect ke routes process
             window.location.href = window.loadingRedirectUrl;
         }
     }
 
-    // Start progress
     setTimeout(runProgress, 500);
 });

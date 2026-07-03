@@ -1,5 +1,3 @@
-/* Questionnaire Wizard Controller */
-
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('questionnaire-form');
     if (!form) return;
@@ -10,9 +8,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const topHeader = document.getElementById('survey-top-header');
     const progressHeader = document.getElementById('step-progress-header');
 
-    let currentStep = 0; // Starts at Intro Screen (Step 0)
+    let currentStep = 0;
 
-    // Field names mapped to each step for validation
     const stepFields = {
         1: ['jam_tidur', 'screen_time'],
         2: ['kualitas_tidur', 'mood_rendah', 'kepuasan_hidup', 'regulasi_emosi'],
@@ -21,50 +18,36 @@ document.addEventListener('DOMContentLoaded', function() {
         5: ['dampak_screen_time', 'dampak_emosi']
     };
 
-    // Helper to get checked radio value
     function getRadioValue(fieldName) {
         const radios = document.getElementsByName(fieldName);
         for (let i = 0; i < radios.length; i++) {
-            if (radios[i].checked) {
-                return radios[i].value;
-            }
+            if (radios[i].checked) return radios[i].value;
         }
         return '-';
     }
 
-    // Validate if current step's questions are completely answered
     function validateCurrentStep() {
-        if (currentStep === 0 || currentStep === 6) return true; // Intro and summary need no validation
-        
+        if (currentStep === 0 || currentStep === 6) return true;
+
         const fields = stepFields[currentStep];
         if (!fields) return true;
 
         let allValid = true;
-
         fields.forEach(field => {
             const input = document.getElementById(field);
             if (input) {
-                // Number input
-                if (input.value.trim() === '') {
-                    allValid = false;
-                }
-            } else {
-                // Radio buttons
-                const value = getRadioValue(field);
-                if (value === '-') {
-                    allValid = false;
-                }
+                if (input.value.trim() === '') allValid = false;
+            } else if (getRadioValue(field) === '-') {
+                allValid = false;
             }
         });
 
         return allValid;
     }
 
-    // Update Step progress indicator and percentage bar
     function updateProgress() {
         if (currentStep < 1 || currentStep > 5) return;
 
-        // Step titles mapping
         const stepTitles = {
             1: "Bagian 1 dari 5: DAILY ACTIVITIES",
             2: "Bagian 2 dari 5: MOOD & EMOTIONAL WELL-BEING",
@@ -74,40 +57,26 @@ document.addEventListener('DOMContentLoaded', function() {
         };
 
         const activeTitleEl = document.getElementById('active-step-title');
-        if (activeTitleEl) {
-            activeTitleEl.textContent = stepTitles[currentStep];
-        }
+        if (activeTitleEl) activeTitleEl.textContent = stepTitles[currentStep];
 
-        // Calculate and set percentage
         const percentage = currentStep * 20;
         if (progressBar) progressBar.style.width = percentage + '%';
         if (progressText) progressText.textContent = percentage + '% Selesai';
 
-        // Adjust bar colors dynamically based on percentage
         if (progressBar) {
-            if (percentage < 40) {
-                progressBar.style.backgroundColor = 'var(--primary)'; // Pink
-            } else if (percentage < 80) {
-                progressBar.style.backgroundColor = 'var(--secondary)'; // Cyan
-            } else {
-                progressBar.style.backgroundColor = 'var(--green)'; // Green
-            }
+            if (percentage < 40) progressBar.style.backgroundColor = 'var(--primary)';
+            else if (percentage < 80) progressBar.style.backgroundColor = 'var(--secondary)';
+            else progressBar.style.backgroundColor = 'var(--green)';
         }
 
-        // Highlight step indicator tabs
-        const stepItems = document.querySelectorAll('.step-progress-item');
-        stepItems.forEach(item => {
+        document.querySelectorAll('.step-progress-item').forEach(item => {
             const stepNum = parseInt(item.getAttribute('data-progress-step'), 10);
             item.classList.remove('active', 'completed');
-            if (stepNum === currentStep) {
-                item.classList.add('active');
-            } else if (stepNum < currentStep) {
-                item.classList.add('completed');
-            }
+            if (stepNum === currentStep) item.classList.add('active');
+            else if (stepNum < currentStep) item.classList.add('completed');
         });
     }
 
-    // Populate mini summary grid on completion screen (Step 6)
     function populateSummary() {
         const jamTidur = document.getElementById('jam_tidur')?.value || '-';
         const screenTime = document.getElementById('screen_time')?.value || '-';
@@ -131,21 +100,15 @@ document.addEventListener('DOMContentLoaded', function() {
         if (summaryOverthinking) summaryOverthinking.textContent = overthinking + "/10";
     }
 
-    // Transition steps
     function showStep(step, direction) {
-        // Hide all steps and remove animations
-        const steps = document.querySelectorAll('.wizard-step');
-        steps.forEach(s => {
+        document.querySelectorAll('.wizard-step').forEach(s => {
             s.classList.remove('active', 'fade-slide-next', 'fade-slide-prev');
         });
 
-        // Hide validation warning box
         if (errorBox) errorBox.style.display = 'none';
 
-        // Update step state
         currentStep = step;
 
-        // Toggle layout visibility for headers
         if (currentStep >= 1 && currentStep <= 5) {
             if (topHeader) topHeader.style.display = 'flex';
             if (progressHeader) progressHeader.style.display = 'block';
@@ -155,73 +118,48 @@ document.addEventListener('DOMContentLoaded', function() {
             if (progressHeader) progressHeader.style.display = 'none';
         }
 
-        // Show active step container
         const targetStep = document.querySelector(`.wizard-step[data-step="${currentStep}"]`);
         if (targetStep) {
             targetStep.classList.add('active');
-            if (direction === 'next') {
-                targetStep.classList.add('fade-slide-next');
-            } else if (direction === 'prev') {
-                targetStep.classList.add('fade-slide-prev');
-            }
+            if (direction === 'next') targetStep.classList.add('fade-slide-next');
+            else if (direction === 'prev') targetStep.classList.add('fade-slide-prev');
         }
 
-        // Auto Scroll to Top
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
 
-        // Populate summary elements if entering Completion Screen (Step 6)
-        if (currentStep === 6) {
-            populateSummary();
-        }
+        if (currentStep === 6) populateSummary();
 
-        // Reinitialize Lucide Icons for dynamic content
-        if (window.lucide) {
-            window.lucide.createIcons();
-        }
+        if (window.lucide) window.lucide.createIcons();
     }
 
     function nextStep() {
         if (validateCurrentStep()) {
             showStep(currentStep + 1, 'next');
-        } else {
-            // Show alert box & animate shake
-            if (errorBox) {
-                errorBox.style.display = 'flex';
-                errorBox.style.animation = 'none';
-                errorBox.offsetHeight; // force reflow
-                errorBox.style.animation = null;
-                errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
+        } else if (errorBox) {
+            errorBox.style.display = 'flex';
+            errorBox.style.animation = 'none';
+            errorBox.offsetHeight;
+            errorBox.style.animation = null;
+            errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     }
 
     function prevStep() {
-        if (currentStep > 0) {
-            showStep(currentStep - 1, 'prev');
-        }
+        if (currentStep > 0) showStep(currentStep - 1, 'prev');
     }
 
-    // Event listeners for Navigation buttons
     form.addEventListener('click', function(e) {
         const target = e.target;
-        
-        // Next button click
         if (target.classList.contains('btn-next') || target.closest('.btn-next')) {
             e.preventDefault();
             nextStep();
         }
-        
-        // Previous button click
         if (target.classList.contains('btn-prev') || target.closest('.btn-prev')) {
             e.preventDefault();
             prevStep();
         }
     });
 
-    // Start button on Intro screen (Step 0)
     const btnStart = document.getElementById('btn-start');
     if (btnStart) {
         btnStart.addEventListener('click', function(e) {
@@ -230,7 +168,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Prevent submitting by hitting enter in input fields
     form.addEventListener('submit', function(e) {
         if (currentStep !== 6) {
             e.preventDefault();
@@ -238,8 +175,5 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Initial load: setup icons
-    if (window.lucide) {
-        window.lucide.createIcons();
-    }
+    if (window.lucide) window.lucide.createIcons();
 });
